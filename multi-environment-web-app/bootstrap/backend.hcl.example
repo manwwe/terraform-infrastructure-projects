@@ -1,0 +1,3 @@
+bucket = "replace-with-state-bucket-name"
+key    = "multi-environment-web-app/bootstrap/terraform.tfstate"
+region = "us-east-1"
