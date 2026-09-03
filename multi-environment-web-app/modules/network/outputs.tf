@@ -24,6 +24,14 @@ output "database_subnet_ids" {
   ]
 }
 
+output "database_subnet_ids_by_az" {
+  description = "IDs of private database subnets keyed by Availability Zone."
+  value = {
+    for az in var.availability_zones :
+    az => aws_subnet.database[az].id
+  }
+}
+
 output "nat_gateway_public_ips" {
   description = "NAT gateway public IP addresses keyed by Availability Zone."
   value = {

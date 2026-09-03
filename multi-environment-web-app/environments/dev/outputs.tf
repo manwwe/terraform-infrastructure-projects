@@ -57,3 +57,38 @@ output "application_instance_profile_arn" {
   description = "ARN of the development application EC2 instance profile."
   value       = module.iam.instance_profile_arn
 }
+
+output "database_instance_identifier" {
+  description = "Identifier of the development PostgreSQL DB instance."
+  value       = module.rds.db_instance_identifier
+}
+
+output "database_instance_arn" {
+  description = "ARN of the development PostgreSQL DB instance."
+  value       = module.rds.db_instance_arn
+}
+
+output "database_address" {
+  description = "DNS address of the development PostgreSQL DB instance."
+  value       = module.rds.address
+}
+
+output "database_endpoint" {
+  description = "Connection endpoint of the development PostgreSQL DB instance."
+  value       = module.rds.endpoint
+}
+
+output "database_port" {
+  description = "Port used by the development PostgreSQL DB instance."
+  value       = module.rds.port
+}
+
+output "database_name" {
+  description = "Name of the initial development PostgreSQL database."
+  value       = module.rds.database_name
+}
+
+output "database_master_user_secret_arn" {
+  description = "ARN of the RDS-managed development master-user secret."
+  value       = module.rds.master_user_secret_arn
+}

@@ -23,7 +23,7 @@ Create a reusable `rds` module that owns:
 The module will accept:
 
 - A resource name prefix
-- Database subnet IDs
+- Database subnet IDs keyed by Availability Zone
 - A database security-group ID
 - Database and master-user names
 - PostgreSQL engine version
@@ -46,6 +46,8 @@ The module will output:
 - The RDS-managed master-user secret ARN
 
 The database will always use encrypted storage and will never be publicly accessible. Environments cannot disable these safeguards.
+
+The module will require database subnets from at least two Availability Zones. The Availability Zone names will be used as stable map keys so Terraform can validate the topology even when subnet IDs are unknown during planning.
 
 RDS will generate and manage the master-user password through AWS Secrets Manager. Terraform will not create a random password or an `aws_secretsmanager_secret_version` resource. No plaintext password will be accepted as an input or exposed as an output.
 
