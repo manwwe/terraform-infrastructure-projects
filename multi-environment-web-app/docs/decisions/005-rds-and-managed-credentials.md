@@ -18,6 +18,7 @@ Create a reusable `rds` module that owns:
 - A PostgreSQL DB instance
 - RDS-managed master credentials
 - PostgreSQL log export to CloudWatch
+- CloudWatch log groups for enabled PostgreSQL log exports
 
 The module will accept:
 
@@ -34,6 +35,7 @@ The module will accept:
 - Final-snapshot settings
 - Automatic minor-version upgrade setting
 - Enabled CloudWatch log exports
+- CloudWatch log-retention period
 - Common resource tags
 
 The module will output:
@@ -61,6 +63,8 @@ The development environment will use:
 - Automatic minor-version upgrades enabled
 - PostgreSQL log export to CloudWatch
 - Enhanced Monitoring and Performance Insights disabled
+
+The development log groups will retain logs for seven days. Terraform will create and manage one log group for each enabled RDS log export before creating the DB instance. This prevents RDS from creating unmanaged log groups with unlimited retention.
 
 The RDS-managed secret ARN will be passed to the IAM module. This will cause the IAM module to create and attach its conditional least-privilege Secrets Manager policy.
 
@@ -103,6 +107,8 @@ The implementation will be verified by:
 - Confirming that the database is private and encrypted
 - Confirming that RDS created the managed secret
 - Confirming that the application IAM role can read only that secret
+- Confirming that exported database logs use Terraform-managed log groups with the configured retention
 - Running a no-drift plan
 - Destroying the development infrastructure
+- Confirming that the log groups are removed during teardown
 - Confirming that the Terraform state is empty
