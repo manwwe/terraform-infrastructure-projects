@@ -7,3 +7,11 @@ module "network" {
   single_nat_gateway = true
   tags               = local.common_tags
 }
+
+module "security" {
+  source = "../../modules/security"
+
+  name_prefix = local.name_prefix
+  vpc_id      = module.network.vpc_id
+  tags        = local.common_tags
+}
