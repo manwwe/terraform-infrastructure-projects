@@ -114,7 +114,7 @@ variable "instance_type" {
   description = "EC2 instance type used by the Auto Scaling group."
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9]*\\.[a-z0-9]+$", var.instance_type))
+    condition     = can(regex("^[a-z][a-z0-9-]*\\.[a-z0-9]+$", var.instance_type))
     error_message = "instance_type must be a valid EC2 instance type such as t3.micro."
   }
 }
@@ -246,13 +246,49 @@ run "creates_private_hardened_compute" {
   }
 
   assert {
-    condition     = aws_launch_template.this.network_interfaces[0].associate_public_ip_address == false
+    condition     = aws_launch_template.this.network_interfaces[0].associate_public_ip_address == "false"
     error_message = "Application instances must not receive public IP addresses."
   }
 
   assert {
-    condition     = aws_launch_template.this.block_device_mappings[0].ebs[0].encrypted == true
+    condition     = aws_launch_template.this.block_device_mappings[0].ebs[0].encrypted == "true"
     error_message = "The root EBS volume must be encrypted."
+  }
+
+  assert {
+    condition     = aws_launch_template.this.network_interfaces[0].security_groups == toset(["sg-0123456789abcdef0"])
+    error_message = "The launch template must attach the application security group."
+  }
+
+  assert {
+    condition     = aws_launch_template.this.iam_instance_profile[0].name == "example-dev-application-profile"
+    error_message = "The launch template must attach the application instance profile."
+  }
+
+  assert {
+    condition = toset(aws_autoscaling_group.this.vpc_zone_identifier) == toset([
+      "subnet-0123456789abcdef0",
+      "subnet-0fedcba9876543210",
+    ])
+    error_message = "The Auto Scaling group must span the supplied private application subnets."
+  }
+
+  assert {
+    condition = (
+      aws_autoscaling_group.this.min_size == 1 &&
+      aws_autoscaling_group.this.desired_capacity == 1 &&
+      aws_autoscaling_group.this.max_size == 2
+    )
+    error_message = "The Auto Scaling group must use the supplied capacity values."
+  }
+
+  assert {
+    condition = (
+      aws_autoscaling_group.this.instance_refresh[0].strategy == "Rolling" &&
+      aws_autoscaling_group.this.instance_refresh[0].preferences[0].min_healthy_percentage == 100 &&
+      aws_autoscaling_group.this.instance_refresh[0].preferences[0].max_healthy_percentage == 200
+    )
+    error_message = "The Auto Scaling group must replace instances with the approved rolling strategy."
   }
 
   assert {
@@ -403,7 +439,6 @@ resource "aws_autoscaling_group" "this" {
     strategy = "Rolling"
 
     preferences {
-      auto_rollback          = true
       max_healthy_percentage = 200
       min_healthy_percentage = 100
       skip_matching          = true
@@ -543,6 +578,12 @@ module "compute" {
   )
 
   tags = local.common_tags
+
+  depends_on = [
+    module.network,
+    module.security,
+    module.iam,
+  ]
 }
 ```
 

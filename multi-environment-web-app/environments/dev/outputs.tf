@@ -92,3 +92,18 @@ output "database_master_user_secret_arn" {
   description = "ARN of the RDS-managed development master-user secret."
   value       = module.rds.master_user_secret_arn
 }
+
+output "application_launch_template_id" {
+  description = "ID of the development application launch template."
+  value       = module.compute.launch_template_id
+}
+
+output "application_autoscaling_group_name" {
+  description = "Name of the development application Auto Scaling group."
+  value       = module.compute.autoscaling_group_name
+}
+
+output "application_autoscaling_group_arn" {
+  description = "ARN of the development application Auto Scaling group."
+  value       = module.compute.autoscaling_group_arn
+}

@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install -y nginx
+
+cat > /usr/share/nginx/html/index.html <<'HTML'
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compute ready</title>
+  </head>
+  <body>
+    <h1>Compute layer ready</h1>
+  </body>
+</html>
+HTML
+
+cat > /usr/share/nginx/html/health <<'TEXT'
+healthy
+TEXT
+
+systemctl enable --now nginx
