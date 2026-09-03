@@ -50,6 +50,17 @@ module "rds" {
   tags                             = local.common_tags
 }
 
+module "load_balancer" {
+  source = "../../modules/load-balancer"
+
+  name_prefix       = local.name_prefix
+  vpc_id            = module.network.vpc_id
+  public_subnet_ids = module.network.public_subnet_ids
+  security_group_id = module.security.load_balancer_security_group_id
+  application_port  = 80
+  tags              = local.common_tags
+}
+
 module "compute" {
   source = "../../modules/compute"
 
@@ -58,10 +69,11 @@ module "compute" {
   application_security_group_id = module.security.application_security_group_id
   instance_profile_name         = module.iam.instance_profile_name
 
-  instance_type    = "t3.micro"
-  min_size         = 1
-  desired_capacity = 1
-  max_size         = 2
+  instance_type     = "t3.micro"
+  min_size          = 1
+  desired_capacity  = 1
+  max_size          = 2
+  target_group_arns = [module.load_balancer.target_group_arn]
 
   user_data = templatefile(
     "${path.module}/templates/compute_user_data.sh.tftpl",

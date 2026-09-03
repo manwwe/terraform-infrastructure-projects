@@ -107,3 +107,23 @@ output "application_autoscaling_group_arn" {
   description = "ARN of the development application Auto Scaling group."
   value       = module.compute.autoscaling_group_arn
 }
+
+output "application_load_balancer_arn" {
+  description = "ARN of the development application load balancer."
+  value       = module.load_balancer.arn
+}
+
+output "application_load_balancer_dns_name" {
+  description = "Public DNS name of the development application load balancer."
+  value       = module.load_balancer.dns_name
+}
+
+output "application_target_group_arn" {
+  description = "ARN of the development application target group."
+  value       = module.load_balancer.target_group_arn
+}
+
+output "application_target_group_name" {
+  description = "Name of the development application target group."
+  value       = module.load_balancer.target_group_name
+}
