@@ -1,36 +1,53 @@
 # State Management
 
-## Backend
+## Implemented Backend
 
-Development and production will store Terraform state in an encrypted, versioned Amazon S3 bucket. Native S3 state locking will be enabled with `use_lockfile = true`.
+The bootstrap root creates an Amazon S3 bucket with server-side encryption,
+versioning, public-access blocking, and deletion safeguards. Development stores
+Terraform state in that bucket and uses native S3 lock files through
+`use_lockfile = true`.
 
-## Environment Isolation
-
-Each environment will use a separate Terraform root configuration and state object:
+The development state key is:
 
 ```text
 multi-environment-web-app/dev/terraform.tfstate
-multi-environment-web-app/prod/terraform.tfstate
 ```
 
-Environment-specific IAM policies will restrict access to the corresponding state and lock objects. Production state will have tighter write permissions.
+The local `backend.hcl` file selects the bucket, key, Region, encryption, and lock
+settings. It is ignored by Git because its values are account-specific.
 
 ## Bootstrap Process
 
-The `bootstrap/` root configuration will eventually create the backend infrastructure. It will initially use local state because the remote backend cannot be used before its S3 bucket exists.
+The state bucket must exist before it can store Terraform state. The bootstrap
+root therefore starts with local state:
 
-After the backend is created:
+1. Initialize and apply `bootstrap/` locally.
+2. Create `bootstrap/backend.hcl` from its example using the new bucket name.
+3. Reinitialize with `terraform init -migrate-state -backend-config=backend.hcl`.
+4. Confirm the migrated bootstrap state before removing local backup copies.
 
-1. Configure the development and production S3 backends.
-2. Initialize each environment separately.
-3. Verify that each environment uses a distinct state key.
-4. Protect or migrate the bootstrap state.
+The detailed commands and safeguards are in
+[the bootstrap guide](../bootstrap/README.md).
 
-## Security and Recovery
+## Environment Isolation
 
-- Block all public access to the state bucket.
-- Enable S3 versioning for state recovery.
-- Enable server-side encryption.
-- Grant access through least-privilege IAM policies.
-- Never commit local state, backup state, or plan files.
-- Use force-unlock only after confirming that no active Terraform operation owns the lock.
+Only development is implemented. A future production root must use a different
+state key and stricter operator permissions; it must not share the development
+state object.
+
+## Lock Recovery
+
+When Terraform reports a lock, identify the active operation and wait for it to
+finish. Use `terraform force-unlock` only after verifying that the lock is stale
+and no Terraform process or automation still owns it. Do not delete S3 lock files
+manually during an active operation.
+
+## Security and Retention
+
+- Keep S3 public-access blocking, encryption, and versioning enabled.
+- Grant operators only the state and lock-object permissions they require.
+- Never commit local state, backup state, backend configuration, variable files,
+  or saved plans.
+- Retain the backend during normal environment teardown.
+- Treat backend deletion as a separate operation after every dependent
+  environment has been removed and its recovery requirements are satisfied.

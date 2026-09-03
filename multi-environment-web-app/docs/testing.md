@@ -1,39 +1,62 @@
 # Testing Strategy
 
-## Static Validation
+## Implemented Automated Checks
 
-Every Terraform change will be checked with:
+The application has 28 Python tests covering routes, score validation, database
+behavior, retries, and secret handling. The compute module has 6 Terraform test
+runs, and the load-balancer module has 4 Terraform test runs.
 
-- `terraform fmt -check`
-- `terraform validate`
-- TFLint
-- A Terraform security scanner
+From the project directory, run:
 
-## Module Tests
+```bash
+terraform fmt -check -recursive .
+terraform -chdir=environments/dev init -backend=false
+terraform -chdir=environments/dev validate
+terraform -chdir=modules/compute init -backend=false
+terraform -chdir=modules/compute test
+terraform -chdir=modules/load-balancer init -backend=false
+terraform -chdir=modules/load-balancer test
+```
 
-Reusable modules will have Terraform test files that verify important inputs, outputs, resource relationships, and validation rules. Tests should avoid unnecessary infrastructure creation when assertions can be evaluated from a plan.
+Run the application suite in an isolated environment:
 
-## Environment Plans
+```bash
+cd application
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m pytest
+```
 
-Development and production plans will run independently. Review will focus on:
+## Plan Review
 
-- Unexpected replacement or deletion
-- Public exposure
-- Environment-specific capacity and protection settings
-- Correct module inputs and outputs
-- Correct state and provider configuration
+Development plans must be saved and inspected before use:
 
-## Integration Testing
+```bash
+terraform plan -var-file=terraform.tfvars -out=tfplan
+terraform show -no-color tfplan
+```
 
-The development environment will be deployed first and checked for:
+Review for unexpected replacement or deletion, changes to public exposure,
+private subnet placement, encryption, IAM scope, and environment-specific cost
+settings.
 
-- Load balancer health
-- Application reachability through HTTPS
-- Auto Scaling group health and replacement behavior
-- Private EC2 access through Systems Manager
-- Application-to-database connectivity
-- Log and metric delivery to CloudWatch
+## Deployment Verification
 
-## Production Readiness
+After deployment:
 
-Before a production deployment, all automated checks must pass and the development deployment must demonstrate the expected network, security, availability, and recovery behavior.
+- Open the ALB HTTP URL and play the game.
+- Confirm `/health` returns HTTP 200 and `{"status":"healthy"}`.
+- Submit a score and confirm it remains on the leaderboard after refresh.
+- Confirm the target is healthy in its ALB target group.
+- Confirm the EC2 instance is online in Systems Manager.
+- Confirm the Auto Scaling group reports its desired instance as healthy.
+
+## Remaining Test Work
+
+- Terraform tests for network, security, IAM, and RDS modules
+- TFLint and Terraform security scanning
+- CI automation
+- Auto Scaling instance-replacement testing
+- Production plans and safeguards, after production is implemented
+- CloudWatch log and alarm verification, after observability is implemented

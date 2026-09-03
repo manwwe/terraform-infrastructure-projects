@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Development AWS architecture</title>
+  <desc id="desc">Internet traffic enters an Application Load Balancer in public subnets, reaches private EC2 instances, and stores Snake scores in private RDS PostgreSQL.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#263238"/></marker>
+    <style>
+      text{font-family:Inter,Arial,sans-serif;fill:#172b4d}.title{font-size:22px;font-weight:700}.label{font-size:14px;font-weight:700}.small{font-size:12px}.tiny{font-size:11px}.boundary{fill:#f8fafc;stroke:#52606d;stroke-width:2}.az{fill:#f0f7ff;stroke:#4c78a8;stroke-width:1.5}.public{fill:#e8f5e9;stroke:#4f8f5b}.app{fill:#fff4e5;stroke:#c47f17}.database{fill:#f3e8ff;stroke:#7a4ca0}.service{stroke-width:1.5}.edge{fill:none;stroke:#263238;stroke-width:2;marker-end:url(#arrow)}.dashed{stroke-dasharray:6 5}.edge-label{font-size:11px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#fff"/>
+  <text x="28" y="38" class="title">Snake application · AWS development architecture</text>
+  <rect x="190" y="60" width="980" height="670" rx="14" class="boundary"/>
+  <text x="210" y="88" class="label">AWS Region · Development</text>
+  <rect x="215" y="105" width="930" height="600" rx="12" fill="#fff" stroke="#52606d" stroke-width="1.5"/>
+  <text x="235" y="132" class="label">VPC</text>
+  <rect x="240" y="150" width="425" height="525" rx="10" class="az"/>
+  <rect x="695" y="150" width="425" height="525" rx="10" class="az"/>
+  <text x="260" y="177" class="label">Availability Zone A</text>
+  <text x="715" y="177" class="label">Availability Zone B</text>
+  <rect x="260" y="195" width="385" height="120" rx="8" class="public"/>
+  <rect x="715" y="195" width="385" height="120" rx="8" class="public"/>
+  <text x="278" y="220" class="small">Public subnet A</text><text x="733" y="220" class="small">Public subnet B</text>
+  <rect x="278" y="240" width="105" height="50" rx="7" fill="#dceeff" stroke="#4c78a8" class="service"/>
+  <text x="330" y="260" text-anchor="middle" class="tiny">Internet</text><text x="330" y="276" text-anchor="middle" class="tiny">gateway</text>
+  <rect x="400" y="240" width="125" height="50" rx="7" fill="#dceeff" stroke="#4c78a8" class="service"/>
+  <text x="462" y="260" text-anchor="middle" class="tiny">Application Load</text><text x="462" y="276" text-anchor="middle" class="tiny">Balancer</text>
+  <rect x="540" y="240" width="88" height="50" rx="7" fill="#dff3e3" stroke="#4f8f5b" class="service"/>
+  <text x="584" y="260" text-anchor="middle" class="tiny">NAT</text><text x="584" y="276" text-anchor="middle" class="tiny">gateway</text>
+  <rect x="850" y="240" width="120" height="50" rx="7" fill="#dceeff" stroke="#4c78a8" stroke-dasharray="5 4"/>
+  <text x="910" y="269" text-anchor="middle" class="small">ALB node</text>
+  <line x1="525" y1="265" x2="850" y2="265" stroke="#4c78a8" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="260" y="340" width="385" height="125" rx="8" class="app"/>
+  <rect x="715" y="340" width="385" height="125" rx="8" class="app"/>
+  <text x="278" y="365" class="small">Private application subnet A</text><text x="733" y="365" class="small">Private application subnet B</text>
+  <rect x="385" y="385" width="145" height="55" rx="7" fill="#ffebcc" stroke="#c47f17" class="service"/>
+  <text x="457" y="407" text-anchor="middle" class="tiny">EC2 · Nginx · Flask</text><text x="457" y="424" text-anchor="middle" class="tiny">desired capacity: 1</text>
+  <rect x="850" y="385" width="145" height="55" rx="7" fill="#fff8ed" stroke="#c47f17" stroke-dasharray="5 4"/>
+  <text x="922" y="407" text-anchor="middle" class="tiny">Auto Scaling</text><text x="922" y="424" text-anchor="middle" class="tiny">placement</text>
+  <line x1="530" y1="412" x2="850" y2="412" stroke="#c47f17" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="260" y="490" width="385" height="145" rx="8" class="database"/>
+  <rect x="715" y="490" width="385" height="145" rx="8" class="database"/>
+  <text x="278" y="515" class="small">Private database subnet A</text><text x="733" y="515" class="small">Private database subnet B</text>
+  <rect x="385" y="545" width="145" height="55" rx="7" fill="#ead9fa" stroke="#7a4ca0" class="service"/>
+  <text x="457" y="567" text-anchor="middle" class="tiny">RDS PostgreSQL</text><text x="457" y="584" text-anchor="middle" class="tiny">Single-AZ development</text>
+  <rect x="850" y="545" width="145" height="55" rx="7" fill="#f8f0ff" stroke="#7a4ca0" stroke-dasharray="5 4"/>
+  <text x="922" y="576" text-anchor="middle" class="small">DB subnet group</text>
+  <line x1="530" y1="572" x2="850" y2="572" stroke="#7a4ca0" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="22" y="215" width="125" height="52" rx="7" fill="#fff" stroke="#52606d" class="service"/>
+  <text x="84" y="246" text-anchor="middle" class="small">Internet clients</text>
+  <rect x="22" y="365" width="125" height="52" rx="7" fill="#e6f4ea" stroke="#3c8c4e" class="service"/>
+  <text x="84" y="396" text-anchor="middle" class="small">Systems Manager</text>
+  <rect x="22" y="520" width="125" height="52" rx="7" fill="#f3e8ff" stroke="#7a4ca0" class="service"/>
+  <text x="84" y="551" text-anchor="middle" class="small">Secrets Manager</text>
+  <path d="M147 241 H250 V265 H400" class="edge"/><text x="220" y="232" class="edge-label">HTTP :80</text>
+  <path d="M462 290 V385" class="edge"/><text x="474" y="340" class="edge-label">HTTP :80</text>
+  <path d="M457 440 V545" class="edge"/><text x="469" y="495" class="edge-label">PostgreSQL :5432</text>
+  <path d="M147 391 H385" class="edge dashed"/><text x="238" y="382" class="edge-label">SSM</text>
+  <path d="M385 420 H175 V546 H147" class="edge dashed"/><text x="185" y="510" class="edge-label">GetSecretValue</text>
+  <path d="M530 400 H584 V290" class="edge dashed"/><text x="594" y="347" class="edge-label">Outbound via NAT</text>
+</svg>

@@ -1,40 +1,48 @@
 # Security
 
+## Implemented Controls
+
+- Only the Application Load Balancer accepts public application traffic.
+- EC2 instances and RDS have no public addresses.
+- Security-group references enforce ALB → application → database traffic.
+- EC2 requires IMDSv2 and uses encrypted EBS storage.
+- RDS storage and remote Terraform state are encrypted.
+- Systems Manager replaces public SSH access.
+- The instance role can read only the configured RDS-managed secret.
+- Public access to the state bucket is blocked, and state changes use native S3
+  lock files.
+
 ## Network Boundaries
 
-The infrastructure will use separate security groups for the load balancer, application, and database layers:
-
-1. The load balancer accepts HTTPS traffic from the internet.
-2. EC2 instances accept application traffic only from the load balancer.
-3. Amazon RDS accepts PostgreSQL traffic only from the application instances.
-
-Application and database resources will run in private subnets. EC2 instances will not have public IP addresses, and the database subnets will not have internet routes.
-
-## Identity and Access Management
-
-EC2 instances will use an IAM role with only the permissions needed to:
-
-- Register with AWS Systems Manager
-- Publish logs and metrics to Amazon CloudWatch
-- Retrieve the required application secrets
-
-Terraform operators and automation will use environment-specific IAM permissions. Production access will be more restrictive than development access.
+The load balancer accepts TCP port 80 from the internet. Its security group can
+send application traffic only to the EC2 security group on port 80. The EC2 group
+can reach RDS on port 5432, and RDS accepts that traffic only from the EC2 group.
+Database subnets have no internet route.
 
 ## Secrets
 
-Database credentials will be stored in AWS Secrets Manager. Credentials and other sensitive values must not be committed to the repository or stored in plaintext variable files.
+RDS generates and stores its master credential in Secrets Manager. Instance user
+data contains the secret ARN and database connection metadata, not the password.
+The Flask process retrieves the value at runtime through its IAM role.
 
-## Encryption
-
-- Terraform state will be encrypted in Amazon S3.
-- Amazon RDS storage and backups will be encrypted.
-- Secrets Manager will encrypt stored secrets.
-- HTTPS will protect client traffic to the load balancer.
+Local `terraform.tfvars` and `backend.hcl` files are ignored because they contain
+environment-specific configuration. Credentials and secret values must never be
+added to examples, logs, documentation, or Git history.
 
 ## Administrative Access
 
-AWS Systems Manager Session Manager will replace direct SSH access. No inbound SSH rule will be exposed to the internet.
+Systems Manager Session Manager provides shell access to private instances. No
+SSH key pair or inbound port 22 rule is configured. Operators should inspect
+application health and service logs without printing Secrets Manager values.
 
-## Production Safeguards
+## Current Limitations
 
-Production will enable deletion protection, stronger backup retention, Multi-AZ database deployment, restricted state access, and additional monitoring and alarms.
+Client traffic uses unencrypted HTTP. HTTPS and DNS are outside the current scope.
+The application uses the RDS master credential; a production design should use a
+restricted application user. CloudWatch application/system log shipping and
+alarms are not configured.
+
+## Production Safeguards Not Yet Implemented
+
+Production, Multi-AZ RDS, deletion protection, longer backup retention, monitoring
+alarms, and stricter operator permissions remain future work.

@@ -1,67 +1,79 @@
-# Architecture
+# Development Architecture
+
+![Development AWS architecture](diagrams/development-architecture.svg)
 
 ## Overview
 
-The application will use a three-tier AWS architecture distributed across two Availability Zones. Only the Application Load Balancer will accept traffic from the internet. Compute and database resources will remain in private subnets.
+The deployed development environment uses a three-tier AWS architecture across
+two Availability Zones. Only the Application Load Balancer accepts public
+application traffic. EC2 instances and RDS remain in private subnets.
 
 ## Request Flow
 
-```text
-Internet
-   |
-   | HTTPS
-   v
-Application Load Balancer
-   |
-   | HTTP on the application port
-   v
-EC2 Auto Scaling Group
-   |
-   | PostgreSQL connection
-   v
-Amazon RDS for PostgreSQL
-```
+1. A browser sends HTTP traffic to the public Application Load Balancer.
+2. The port 80 listener forwards to healthy Nginx targets on port 80.
+3. Nginx proxies application requests to Gunicorn and Flask.
+4. Flask retrieves database credentials through the EC2 role and stores scores
+   in RDS PostgreSQL.
 
-## Network Design
+The target group checks `/health`. That endpoint returns success only when Flask
+can query PostgreSQL, so the load balancer routes traffic only to instances with
+a working application-to-database path.
 
-The VPC will span two Availability Zones. Each Availability Zone will contain:
+## Network Layout
 
-- One public subnet for the load balancer and outbound network infrastructure
-- One private application subnet for EC2 instances
-- One private database subnet for RDS
+Each Availability Zone contains a public subnet, a private application subnet,
+and a private database subnet. The load balancer spans both public subnets. The
+Auto Scaling group spans both application subnets, and the RDS subnet group spans
+both database subnets.
 
-An internet gateway will provide connectivity for public subnets. NAT gateways will provide controlled outbound access from private application subnets. Database subnets will not have a route to the internet.
+An internet gateway serves the public tier. A single development NAT gateway in
+the first public subnet provides outbound package and AWS API access for private
+application instances. Database route tables have no internet route.
 
-## Application Layer
+## Compute and Application
 
-An internet-facing Application Load Balancer will terminate HTTPS and distribute requests across EC2 instances. The instances will run in an Auto Scaling group across private application subnets and will not receive public IP addresses.
+The Auto Scaling group currently maintains one `t3.micro` instance and may scale
+to two. Instances have no public IP address and use an Amazon Linux 2023 launch
+template with IMDSv2 and encrypted EBS. Cloud-init installs Nginx, Gunicorn, and
+the Flask Snake application.
 
-AWS Systems Manager will provide administrative access without exposing SSH to the internet. Amazon CloudWatch will collect application and infrastructure logs, metrics, and alarms.
+The game stores only an integer score and creation timestamp. Multiple instances
+can safely initialize the same table with `CREATE TABLE IF NOT EXISTS`.
 
-## Database Layer
+## Database and Secrets
 
-Amazon RDS for PostgreSQL will run in private database subnets. Production will use a Multi-AZ deployment. Automated backups, encryption at rest, and deletion protection will be enabled according to environment requirements.
+Development uses an encrypted Single-AZ RDS PostgreSQL instance in private
+database subnets. RDS manages the master credential in Secrets Manager. The EC2
+role can retrieve the configured secret; secret values are not embedded in
+Terraform state, launch-template user data, or browser responses.
 
-Database credentials will be stored in AWS Secrets Manager rather than committed to Terraform configuration.
+## Security and Administration
 
-## Security Boundaries
+Traffic follows security-group references rather than public instance rules:
 
-Traffic will follow a restricted chain:
+1. Internet clients reach the load balancer on TCP port 80.
+2. The application tier accepts TCP port 80 only from the load balancer group.
+3. RDS accepts TCP port 5432 only from the application group.
 
-1. The load balancer security group accepts HTTPS from the internet.
-2. The application security group accepts application traffic only from the load balancer security group.
-3. The database security group accepts PostgreSQL traffic only from the application security group.
-
-IAM roles will grant EC2 instances only the permissions required for Systems Manager, logging, metrics, and secret retrieval.
-
-## Environment Isolation
-
-Development and production will use separate Terraform root configurations and separate state objects. Both environments will consume the same reusable modules while providing different capacity, availability, backup, and protection settings.
+Systems Manager provides administrative access without SSH keys, inbound SSH, or
+public instance addresses.
 
 ## State Management
 
-Terraform state will use an encrypted, versioned S3 backend. Native S3 locking will be enabled with `use_lockfile = true`. Each environment will use a distinct state key and environment-specific IAM permissions.
+The development root stores state in an encrypted, versioned S3 bucket with
+native S3 lock files. Bootstrap and development state remain separate. Local
+`backend.hcl` and `terraform.tfvars` files are ignored by Git.
 
-## Diagram Strategy
+## Availability and Cost Choices
 
-The final visual architecture will use a native `.drawio` source file and an exported SVG embedded in this document. Those assets will be created only after the architecture and diagram-generation workflow are finalized.
+The ALB and Auto Scaling group span two Availability Zones. Development keeps one
+EC2 instance, one NAT gateway, and a Single-AZ RDS instance to control cost. The
+Auto Scaling group replaces failed instances, but a single desired instance does
+not provide uninterrupted compute availability during replacement.
+
+## Scope
+
+Production is not implemented. HTTPS, Route 53, a custom domain, CloudWatch
+application/system log shipping, and alarms are outside the current
+implementation.
