@@ -65,7 +65,22 @@ module "compute" {
 
   user_data = templatefile(
     "${path.module}/templates/compute_user_data.sh.tftpl",
-    {}
+    {
+      aws_region          = var.aws_region
+      database_secret_arn = module.rds.master_user_secret_arn
+      database_host       = module.rds.address
+      database_port       = module.rds.port
+      database_name       = module.rds.database_name
+
+      requirements_gzip_b64 = base64gzip(file("${path.module}/../../application/requirements.txt"))
+      app_init_gzip_b64     = base64gzip(file("${path.module}/../../application/snake_app/__init__.py"))
+      database_gzip_b64     = base64gzip(file("${path.module}/../../application/snake_app/database.py"))
+      init_db_gzip_b64      = base64gzip(file("${path.module}/../../application/snake_app/init_db.py"))
+      wsgi_gzip_b64         = base64gzip(file("${path.module}/../../application/snake_app/wsgi.py"))
+      index_gzip_b64        = base64gzip(file("${path.module}/../../application/snake_app/templates/index.html"))
+      styles_gzip_b64       = base64gzip(file("${path.module}/../../application/snake_app/static/styles.css"))
+      game_gzip_b64         = base64gzip(file("${path.module}/../../application/snake_app/static/game.js"))
+    }
   )
 
   tags = local.common_tags

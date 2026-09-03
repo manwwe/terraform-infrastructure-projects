@@ -93,8 +93,12 @@ variable "user_data" {
   description = "Plain-text instance bootstrap script. It must not contain secret values."
 
   validation {
-    condition     = startswith(trimspace(var.user_data), "#!")
-    error_message = "user_data must be a non-empty script beginning with a shebang."
+    condition = (
+      startswith(trimspace(var.user_data), "#!") &&
+      length(regexall("[^\\x00-\\x7F]", var.user_data)) == 0 &&
+      length(var.user_data) <= 16384
+    )
+    error_message = "user_data must begin with a shebang and contain no more than 16,384 bytes of ASCII text."
   }
 }
 

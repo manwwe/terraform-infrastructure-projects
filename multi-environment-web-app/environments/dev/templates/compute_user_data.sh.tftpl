@@ -1,24 +1,75 @@
 #!/bin/bash
 set -euo pipefail
 
-dnf install -y nginx
+APP_ROOT=/opt/snake-app
 
-cat > /usr/share/nginx/html/index.html <<'HTML'
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Compute ready</title>
-  </head>
-  <body>
-    <h1>Compute layer ready</h1>
-  </body>
-</html>
-HTML
+dnf install -y nginx python3 python3-pip policycoreutils-python-utils
 
-cat > /usr/share/nginx/html/health <<'TEXT'
-healthy
-TEXT
+id snake >/dev/null 2>&1 || useradd --system --home-dir "$APP_ROOT" --shell /sbin/nologin snake
+install -d -o snake -g snake "$APP_ROOT/snake_app/templates" "$APP_ROOT/snake_app/static"
 
-systemctl enable --now nginx
+printf '%s' '${requirements_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/requirements.txt"
+printf '%s' '${app_init_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/__init__.py"
+printf '%s' '${database_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/database.py"
+printf '%s' '${init_db_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/init_db.py"
+printf '%s' '${wsgi_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/wsgi.py"
+printf '%s' '${index_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/templates/index.html"
+printf '%s' '${styles_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/static/styles.css"
+printf '%s' '${game_gzip_b64}' | base64 --decode | gzip --decompress > "$APP_ROOT/snake_app/static/game.js"
+
+python3 -m venv "$APP_ROOT/venv"
+"$APP_ROOT/venv/bin/pip" install --no-cache-dir --requirement "$APP_ROOT/requirements.txt"
+chown -R snake:snake "$APP_ROOT"
+
+cat > /etc/snake-app.env <<'ENVIRONMENT'
+AWS_REGION=${aws_region}
+DB_SECRET_ARN=${database_secret_arn}
+DB_HOST=${database_host}
+DB_PORT=${database_port}
+DB_NAME=${database_name}
+ENVIRONMENT
+chmod 0600 /etc/snake-app.env
+
+cat > /etc/systemd/system/snake-app.service <<'SYSTEMD'
+[Unit]
+Description=Subnet Snake Flask application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=snake
+Group=snake
+WorkingDirectory=/opt/snake-app
+Environment=PYTHONPATH=/opt/snake-app
+EnvironmentFile=/etc/snake-app.env
+ExecStartPre=/opt/snake-app/venv/bin/python -m snake_app.init_db
+ExecStart=/opt/snake-app/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 snake_app.wsgi:app
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+install -d /etc/nginx/default.d
+cat > /etc/nginx/default.d/snake-app.conf <<'NGINX'
+location / {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+}
+NGINX
+
+setsebool -P httpd_can_network_connect 1
+nginx -t
+systemctl daemon-reload
+systemctl enable --now snake-app nginx

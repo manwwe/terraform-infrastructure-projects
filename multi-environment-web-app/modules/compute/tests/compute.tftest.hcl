@@ -112,3 +112,42 @@ run "rejects_invalid_capacity_order" {
 
   expect_failures = [aws_autoscaling_group.this]
 }
+
+run "rejects_oversized_user_data" {
+  command = plan
+
+  variables {
+    user_data = join("", concat(
+      ["#!/bin/bash\n"],
+      [for index in range(1024) : "0123456789abcdef"]
+    ))
+  }
+
+  expect_failures = [var.user_data]
+}
+
+run "accepts_user_data_at_exact_limit" {
+  command = plan
+
+  variables {
+    user_data = join("", [
+      "#!/bin/bash\n",
+      substr(join("", [for index in range(1024) : "0123456789abcdef"]), 0, 16372),
+    ])
+  }
+
+  assert {
+    condition     = length(var.user_data) == 16384
+    error_message = "The exact 16,384-byte ASCII boundary must remain valid."
+  }
+}
+
+run "rejects_multibyte_user_data" {
+  command = plan
+
+  variables {
+    user_data = "#!/bin/bash\necho 'é'"
+  }
+
+  expect_failures = [var.user_data]
+}

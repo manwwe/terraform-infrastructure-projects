@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b100d">
+    <title>Subnet Snake</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="cabinet">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">PRIVATE SUBNET ARCADE</p>
+          <h1>SUBNET SNAKE</h1>
+        </div>
+        <div class="connection" aria-live="polite">
+          <span class="connection__light" id="db-light"></span>
+          <span id="db-status">Checking score link</span>
+        </div>
+      </header>
+
+      <section class="game-panel" aria-label="Snake game">
+        <div class="score-strip">
+          <div>
+            <span class="label">SCORE</span>
+            <strong id="score">0000</strong>
+          </div>
+          <p id="game-status" role="status">Press Start or an arrow key</p>
+          <button class="start-button" id="start-button" type="button">START</button>
+        </div>
+
+        <div class="screen-frame">
+          <canvas id="game" width="480" height="480" aria-label="Snake game board"></canvas>
+          <div class="scanlines" aria-hidden="true"></div>
+        </div>
+
+        <div class="touch-controls" aria-label="Touch controls">
+          <button data-direction="up" aria-label="Move up">▲</button>
+          <button data-direction="left" aria-label="Move left">◀</button>
+          <button data-direction="down" aria-label="Move down">▼</button>
+          <button data-direction="right" aria-label="Move right">▶</button>
+        </div>
+      </section>
+
+      <aside class="leaderboard" aria-labelledby="leaderboard-title">
+        <div class="leaderboard__heading">
+          <div>
+            <p class="eyebrow">POSTGRESQL MEMORY</p>
+            <h2 id="leaderboard-title">HIGH SCORES</h2>
+          </div>
+          <button class="refresh-button" id="refresh-scores" type="button">REFRESH</button>
+        </div>
+        <ol id="scores" class="score-trail" aria-live="polite">
+          <li class="score-message">Loading scores…</li>
+        </ol>
+      </aside>
+
+      <footer>
+        <span>ARROWS / WASD / TOUCH</span>
+        <span>EC2 · FLASK · RDS</span>
+      </footer>
+    </main>
+    <script src="{{ url_for('static', filename='game.js') }}" defer></script>
+  </body>
+</html>
