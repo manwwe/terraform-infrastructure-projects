@@ -18,3 +18,12 @@ output "alarm_names" {
     rds_free_storage = aws_cloudwatch_metric_alarm.rds_free_storage.alarm_name
   }
 }
+
+output "configuration" {
+  description = "Non-sensitive environment settings applied to CloudWatch resources."
+  value = {
+    log_retention_in_days          = var.log_retention_in_days
+    minimum_healthy_instance_count = var.minimum_healthy_instance_count
+    rds_free_storage_threshold     = var.rds_free_storage_threshold
+  }
+}

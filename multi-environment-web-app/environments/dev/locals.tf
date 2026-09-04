@@ -8,4 +8,6 @@ locals {
     Repository  = "terraform-infrastructure-projects"
     Owner       = var.owner
   }
+
+  observability_log_group_names = module.observability.log_group_names
 }

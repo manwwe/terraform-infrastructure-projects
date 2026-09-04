@@ -25,6 +25,15 @@ mock_provider "aws" {
     }
   }
 
+  mock_resource "aws_lb" {
+    override_during = plan
+
+    defaults = {
+      arn        = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/example-prod/0123456789abcdef"
+      arn_suffix = "app/example-prod/0123456789abcdef"
+    }
+  }
+
   mock_resource "aws_db_instance" {
     override_during = plan
 
@@ -42,7 +51,16 @@ mock_provider "aws" {
     override_during = plan
 
     defaults = {
-      arn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/example-prod/0123456789abcdef"
+      arn        = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/example-prod/0123456789abcdef"
+      arn_suffix = "targetgroup/example-prod/0123456789abcdef"
+    }
+  }
+
+  mock_resource "aws_cloudwatch_log_group" {
+    override_during = plan
+
+    defaults = {
+      arn = "arn:aws:logs:us-east-1:123456789012:log-group:/example-prod/application"
     }
   }
 }
@@ -97,6 +115,24 @@ run "enforces_production_resilience" {
       module.security.https_ingress_rule_count == 0
     )
     error_message = "Production must allow approved HTTP CIDRs and must not expose unused HTTPS ingress."
+  }
+
+  assert {
+    condition = module.observability.configuration == {
+      log_retention_in_days          = 30
+      minimum_healthy_instance_count = 2
+      rds_free_storage_threshold     = 5368709120
+    }
+    error_message = "Production must use the approved observability settings."
+  }
+
+  assert {
+    condition = local.observability_log_group_names == {
+      application = "/multi-environment-web-app-prod/application"
+      nginx       = "/multi-environment-web-app-prod/nginx"
+      cloud_init  = "/multi-environment-web-app-prod/cloud-init"
+    }
+    error_message = "Production bootstrap must receive every environment log-group name."
   }
 }
 

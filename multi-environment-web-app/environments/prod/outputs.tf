@@ -127,3 +127,13 @@ output "application_target_group_name" {
   description = "Name of the production application target group."
   value       = module.load_balancer.target_group_name
 }
+
+output "cloudwatch_log_group_names" {
+  description = "CloudWatch log groups used by production."
+  value       = module.observability.log_group_names
+}
+
+output "cloudwatch_alarm_names" {
+  description = "Essential CloudWatch alarms used by production."
+  value       = module.observability.alarm_names
+}

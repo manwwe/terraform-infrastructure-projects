@@ -21,9 +21,10 @@ module "security" {
 module "iam" {
   source = "../../modules/iam"
 
-  name_prefix = local.name_prefix
-  secret_arns = [module.rds.master_user_secret_arn]
-  tags        = local.common_tags
+  name_prefix               = local.name_prefix
+  cloudwatch_log_group_arns = values(module.observability.log_group_arns)
+  secret_arns               = [module.rds.master_user_secret_arn]
+  tags                      = local.common_tags
 }
 
 module "rds" {
@@ -64,6 +65,22 @@ module "load_balancer" {
   tags              = local.common_tags
 }
 
+module "observability" {
+  source = "../../modules/observability"
+
+  name_prefix                    = local.name_prefix
+  load_balancer_arn_suffix       = module.load_balancer.arn_suffix
+  target_group_arn_suffix        = module.load_balancer.target_group_arn_suffix
+  autoscaling_group_name         = "${local.name_prefix}-application-asg"
+  database_instance_identifier   = "${local.name_prefix}-postgresql"
+  minimum_healthy_instance_count = 2
+  log_retention_in_days          = 30
+  ec2_cpu_threshold_percent      = 80
+  rds_cpu_threshold_percent      = 80
+  rds_free_storage_threshold     = 5368709120
+  tags                           = local.common_tags
+}
+
 module "compute" {
   source = "../../modules/compute"
 
@@ -86,6 +103,10 @@ module "compute" {
       database_host       = module.rds.address
       database_port       = module.rds.port
       database_name       = module.rds.database_name
+
+      application_log_group_name = local.observability_log_group_names.application
+      nginx_log_group_name       = local.observability_log_group_names.nginx
+      cloud_init_log_group_name  = local.observability_log_group_names.cloud_init
 
       requirements_gzip_b64 = base64gzip(file("${path.module}/../../application/requirements.txt"))
       app_init_gzip_b64     = base64gzip(file("${path.module}/../../application/snake_app/__init__.py"))
