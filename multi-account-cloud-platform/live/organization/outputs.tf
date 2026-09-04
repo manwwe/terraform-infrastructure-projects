@@ -22,3 +22,6 @@ output "guardrail_policy_ids" {
   description = "Initial guardrail policy IDs, or an empty map when disabled."
   value       = try(module.initial_guardrails[0].policy_ids, {})
 }
+
+output "terraform_plan_role_arn" { value = module.ci_access.plan_role_arn }
+output "terraform_apply_role_arn" { value = module.ci_access.apply_role_arn }

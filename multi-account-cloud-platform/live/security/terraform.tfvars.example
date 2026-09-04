@@ -4,6 +4,10 @@ organization_id        = "o-abcdefghij"
 audit_bucket_name      = "macp-security-audit-111111111111"
 access_log_bucket_name = "macp-security-access-111111111111"
 owner                   = "platform-team"
+management_account_id   = "111111111111"
+github_repository       = "example/terraform-infrastructure-projects"
+state_bucket_name       = "macp-shared-terraform-state-example"
+state_kms_key_arn       = "arn:aws:kms:us-east-1:111111111111:key/00000000-0000-0000-0000-000000000000"
 
 enrolled_account_names = ["development"]
 

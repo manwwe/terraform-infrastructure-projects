@@ -6,8 +6,18 @@ owner               = "platform-team"
 project_name        = "multi-account-cloud-platform"
 
 authorized_principal_arns = [
+  "arn:aws:iam::111111111111:role/macp-management-terraform-plan",
+  "arn:aws:iam::111111111111:role/macp-management-terraform-apply",
+  "arn:aws:iam::555566667777:role/macp-security-terraform-plan",
+  "arn:aws:iam::555566667777:role/macp-security-terraform-apply",
+  "arn:aws:iam::111111111111:role/macp-management-terraform-plan",
+  "arn:aws:iam::111111111111:role/macp-management-terraform-apply",
+  "arn:aws:iam::555566667777:role/macp-security-terraform-plan",
+  "arn:aws:iam::555566667777:role/macp-security-terraform-apply",
   "arn:aws:iam::111122223333:role/macp-shared-terraform-plan",
   "arn:aws:iam::111122223333:role/macp-shared-terraform-apply",
   "arn:aws:iam::777788889999:role/macp-development-terraform-plan",
-  "arn:aws:iam::777788889999:role/macp-development-terraform-apply"
+  "arn:aws:iam::777788889999:role/macp-development-terraform-apply",
+  "arn:aws:iam::999900001111:role/macp-production-terraform-plan",
+  "arn:aws:iam::999900001111:role/macp-production-terraform-apply"
 ]

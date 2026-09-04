@@ -1,0 +1,117 @@
+name: Multi-account Terraform plan
+
+on:
+  pull_request:
+    paths:
+      - "multi-account-cloud-platform/live/**"
+      - "multi-account-cloud-platform/modules/**"
+      - "multi-account-cloud-platform/bootstrap/**"
+      - ".github/workflows/multi-account-terraform-plan.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            organization:
+              - 'multi-account-cloud-platform/live/organization/**'
+              - 'multi-account-cloud-platform/modules/ci-access/**'
+              - 'multi-account-cloud-platform/modules/organization/**'
+              - 'multi-account-cloud-platform/modules/service-control-policies/**'
+            security:
+              - 'multi-account-cloud-platform/live/security/**'
+              - 'multi-account-cloud-platform/modules/ci-access/**'
+              - 'multi-account-cloud-platform/modules/account-baseline/**'
+              - 'multi-account-cloud-platform/modules/audit-logging/**'
+              - 'multi-account-cloud-platform/modules/security-services/**'
+            shared:
+              - 'multi-account-cloud-platform/live/shared-services/**'
+              - 'multi-account-cloud-platform/modules/deployment-role/**'
+              - 'multi-account-cloud-platform/modules/private-dns/**'
+              - 'multi-account-cloud-platform/modules/terraform-state/**'
+            development:
+              - 'multi-account-cloud-platform/live/workloads/development/**'
+              - 'multi-account-cloud-platform/modules/account-baseline/**'
+              - 'multi-account-cloud-platform/modules/deployment-role/**'
+              - 'multi-account-cloud-platform/modules/vpc/**'
+            production:
+              - 'multi-account-cloud-platform/live/workloads/production/**'
+              - 'multi-account-cloud-platform/modules/account-baseline/**'
+              - 'multi-account-cloud-platform/modules/deployment-role/**'
+              - 'multi-account-cloud-platform/modules/vpc/**'
+      - id: matrix
+        name: Build changed-root matrix
+        env:
+          ORGANIZATION_CHANGED: ${{ steps.filter.outputs.organization }}
+          SECURITY_CHANGED: ${{ steps.filter.outputs.security }}
+          SHARED_CHANGED: ${{ steps.filter.outputs.shared }}
+          DEVELOPMENT_CHANGED: ${{ steps.filter.outputs.development }}
+          PRODUCTION_CHANGED: ${{ steps.filter.outputs.production }}
+        run: |
+          matrix='{"include":[]}'
+          add_root() {
+            matrix=$(jq -c \
+              --arg environment "$1" \
+              --arg root "$2" \
+              --arg state_key "$3" \
+              '.include += [{environment: $environment, root: $root, state_key: $state_key}]' \
+              <<< "$matrix")
+          }
+          [[ "$ORGANIZATION_CHANGED" == "true" ]] && add_root organization multi-account-cloud-platform/live/organization organization/terraform.tfstate
+          [[ "$SECURITY_CHANGED" == "true" ]] && add_root security multi-account-cloud-platform/live/security security/terraform.tfstate
+          [[ "$SHARED_CHANGED" == "true" ]] && add_root shared-services multi-account-cloud-platform/live/shared-services shared-services/terraform.tfstate
+          [[ "$DEVELOPMENT_CHANGED" == "true" ]] && add_root development multi-account-cloud-platform/live/workloads/development workloads/development/terraform.tfstate
+          [[ "$PRODUCTION_CHANGED" == "true" ]] && add_root production multi-account-cloud-platform/live/workloads/production workloads/production/terraform.tfstate
+          echo "value=$matrix" >> "$GITHUB_OUTPUT"
+
+  plan:
+    needs: changes
+    if: needs.changes.outputs.matrix != '{"include":[]}'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.16.0
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Write environment inputs
+        env:
+          TFVARS_JSON: ${{ secrets.TFVARS_JSON }}
+        run: printf '%s' "$TFVARS_JSON" > "${{ matrix.root }}/ci.auto.tfvars.json"
+      - name: Initialize backend
+        run: >-
+          terraform -chdir=${{ matrix.root }} init -input=false
+          -backend-config=bucket=${{ secrets.STATE_BUCKET_NAME }}
+          -backend-config=key=${{ matrix.state_key }}
+          -backend-config=region=${{ vars.AWS_REGION }}
+          -backend-config=encrypt=true
+          -backend-config=kms_key_id=${{ secrets.STATE_KMS_KEY_ARN }}
+          -backend-config=use_lockfile=true
+      - name: Create saved plan
+        run: terraform -chdir=${{ matrix.root }} plan -input=false -out=plan.tfplan
+      - name: Remove environment inputs
+        if: always()
+        run: rm -f "${{ matrix.root }}/ci.auto.tfvars.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: terraform-plan-${{ matrix.environment }}
+          path: ${{ matrix.root }}/plan.tfplan
+          retention-days: 2
+          if-no-files-found: error

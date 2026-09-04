@@ -96,3 +96,7 @@ variable "owner" {
     error_message = "owner must not be empty."
   }
 }
+
+variable "github_repository" { type = string }
+variable "state_bucket_name" { type = string }
+variable "state_kms_key_arn" { type = string }

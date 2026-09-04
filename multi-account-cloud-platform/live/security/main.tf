@@ -7,6 +7,18 @@ locals {
   }
 }
 
+module "ci_access" {
+  source = "../../modules/ci-access"
+
+  name_prefix                = "macp-security"
+  github_repository          = var.github_repository
+  github_environment         = "security"
+  state_bucket_name          = var.state_bucket_name
+  state_kms_key_arn          = var.state_kms_key_arn
+  trusted_aws_principal_arns = ["arn:aws:iam::${var.management_account_id}:root"]
+  tags                       = local.tags
+}
+
 module "audit_logging" {
   source = "../../modules/audit-logging"
 

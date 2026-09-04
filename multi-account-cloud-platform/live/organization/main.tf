@@ -1,5 +1,15 @@
 data "aws_organizations_organization" "current" {}
 
+module "ci_access" {
+  source = "../../modules/ci-access"
+
+  name_prefix        = "macp-management"
+  github_repository  = var.github_repository
+  github_environment = "organization"
+  state_bucket_name  = var.state_bucket_name
+  state_kms_key_arn  = var.state_kms_key_arn
+}
+
 module "organization" {
   source = "../../modules/organization"
 

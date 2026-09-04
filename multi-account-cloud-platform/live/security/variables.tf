@@ -29,3 +29,8 @@ variable "enrolled_account_names" {
   type    = set(string)
   default = ["development"]
 }
+
+variable "management_account_id" { type = string }
+variable "github_repository" { type = string }
+variable "state_bucket_name" { type = string }
+variable "state_kms_key_arn" { type = string }

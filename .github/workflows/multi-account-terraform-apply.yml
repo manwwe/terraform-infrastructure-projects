@@ -1,0 +1,109 @@
+name: Multi-account Terraform apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Protected environment and saved-plan target
+        required: true
+        type: choice
+        options:
+          - organization
+          - security
+          - shared-services
+          - development
+          - production
+      plan_run_id:
+        description: Successful Terraform plan workflow run ID
+        required: true
+        type: string
+      commit_sha:
+        description: Exact commit SHA used to create the saved plan
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      root: ${{ steps.target.outputs.root }}
+      state_key: ${{ steps.target.outputs.state_key }}
+    steps:
+      - name: Verify plan run and commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAN_RUN_ID: ${{ inputs.plan_run_id }}
+          EXPECTED_SHA: ${{ inputs.commit_sha }}
+        run: |
+          [[ "$PLAN_RUN_ID" =~ ^[0-9]+$ ]]
+          actual_sha=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PLAN_RUN_ID}" --jq .head_sha)
+          conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PLAN_RUN_ID}" --jq .conclusion)
+          workflow_name=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PLAN_RUN_ID}" --jq .name)
+          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          [[ "$conclusion" == "success" ]]
+          [[ "$workflow_name" == "Multi-account Terraform plan" ]]
+      - id: target
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          case "$TARGET" in
+            organization)
+              echo "root=multi-account-cloud-platform/live/organization" >> "$GITHUB_OUTPUT"
+              echo "state_key=organization/terraform.tfstate" >> "$GITHUB_OUTPUT"
+              ;;
+            security)
+              echo "root=multi-account-cloud-platform/live/security" >> "$GITHUB_OUTPUT"
+              echo "state_key=security/terraform.tfstate" >> "$GITHUB_OUTPUT"
+              ;;
+            shared-services)
+              echo "root=multi-account-cloud-platform/live/shared-services" >> "$GITHUB_OUTPUT"
+              echo "state_key=shared-services/terraform.tfstate" >> "$GITHUB_OUTPUT"
+              ;;
+            development)
+              echo "root=multi-account-cloud-platform/live/workloads/development" >> "$GITHUB_OUTPUT"
+              echo "state_key=workloads/development/terraform.tfstate" >> "$GITHUB_OUTPUT"
+              ;;
+            production)
+              echo "root=multi-account-cloud-platform/live/workloads/production" >> "$GITHUB_OUTPUT"
+              echo "state_key=workloads/production/terraform.tfstate" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+  apply:
+    needs: select
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    concurrency: macp-apply-${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.16.0
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_APPLY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: terraform-plan-${{ inputs.target }}
+          path: ${{ needs.select.outputs.root }}
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.plan_run_id }}
+      - name: Initialize backend
+        run: >-
+          terraform -chdir=${{ needs.select.outputs.root }} init -input=false
+          -backend-config=bucket=${{ secrets.STATE_BUCKET_NAME }}
+          -backend-config=key=${{ needs.select.outputs.state_key }}
+          -backend-config=region=${{ vars.AWS_REGION }}
+          -backend-config=encrypt=true
+          -backend-config=kms_key_id=${{ secrets.STATE_KMS_KEY_ARN }}
+          -backend-config=use_lockfile=true
+      - name: Apply reviewed plan
+        run: terraform -chdir=${{ needs.select.outputs.root }} apply -input=false plan.tfplan
