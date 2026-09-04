@@ -46,7 +46,6 @@ Environment=PYTHONPATH=/opt/snake-app
 EnvironmentFile=/etc/snake-app.env
 ExecStartPre=/opt/snake-app/venv/bin/python -m snake_app.init_db
 ExecStart=/opt/snake-app/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 snake_app.wsgi:app
-LogsDirectory=snake-app
 StandardOutput=append:/var/log/snake-app/application.log
 StandardError=append:/var/log/snake-app/application.log
 Restart=on-failure

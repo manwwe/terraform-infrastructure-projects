@@ -142,6 +142,11 @@ run "enforces_production_resilience" {
     )
     error_message = "Production bootstrap must create the application log directory before starting the service."
   }
+
+  assert {
+    condition     = !strcontains(file("${path.module}/templates/compute_user_data.sh.tftpl"), "LogsDirectory=snake-app")
+    error_message = "Production must not let systemd remove the explicitly managed application log directory."
+  }
 }
 
 run "rejects_public_ingress" {
