@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 TERRAFORM_DIRS := $(shell find . -type f -name '*.tf' -exec dirname {} \; | sort -u)
-TEST_DIRS := $(shell find . -type f -name '*.tftest.hcl' -exec dirname {} \; | sort -u)
+TEST_DIRS := $(shell find . -type f -name '*.tftest.hcl' -exec dirname {} \; | sed 's/\/tests$$//' | sort -u)
 
 .PHONY: fmt validate test lint security check
 

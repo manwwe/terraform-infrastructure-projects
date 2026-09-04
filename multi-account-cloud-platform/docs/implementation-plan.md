@@ -176,7 +176,7 @@
 - [x] Define MFA and short-session requirements.
 - [x] Document break-glass credential custody, use, monitoring, and rotation.
 - [ ] Test sign-in and role assumption in each account.
-- [ ] Commit with `docs(iam): define platform access model`.
+- [x] Commit with `docs(iam): define platform access model`.
 
 ## Phase 5: Central Audit and Security
 
@@ -193,7 +193,7 @@
 - [x] Test organization CloudTrail, log validation, and restricted bucket policies.
 - [x] Implement lifecycle transitions without routine delete permissions.
 - [ ] Deliver a test event and verify its object in the Security account.
-- [ ] Commit with `feat(audit): centralize organization audit logs`.
+- [x] Commit with `feat(audit): centralize organization audit logs`.
 
 ### Task 11: Build account baselines and security aggregation
 
@@ -203,13 +203,13 @@
 - Create: `modules/security-services/`
 - Create: `live/security/`
 
-- [ ] Test Config recorders and delivery channels for member accounts.
-- [ ] Configure the Security account as the Config aggregation destination.
-- [ ] Enable GuardDuty and Security Hub delegated administration where supported.
+- [x] Test Config recorders and delivery channels for member accounts.
+- [x] Configure the Security account as the Config aggregation destination.
+- [x] Define GuardDuty, Security Hub, and Config delegated administration.
 - [ ] Enroll Development first and verify findings reach the Security account.
 - [ ] Enroll the remaining member accounts after validation.
 - [ ] Run a no-change plan for every affected root.
-- [ ] Commit with `feat(security): add centralized security baseline`.
+- [x] Commit with `feat(security): add centralized security baseline`.
 
 ## Phase 6: Shared Services
 

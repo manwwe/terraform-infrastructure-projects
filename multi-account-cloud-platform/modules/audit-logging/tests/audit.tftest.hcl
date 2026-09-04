@@ -44,6 +44,10 @@ run "central_audit_controls" {
     error_message = "The audit policy must require TLS and permit CloudTrail delivery."
   }
   assert {
+    condition     = strcontains(aws_s3_bucket_policy.audit.policy, "config.amazonaws.com") && strcontains(aws_s3_bucket_policy.audit.policy, "aws:SourceOrgID")
+    error_message = "The audit policy must permit AWS Config delivery from this organization."
+  }
+  assert {
     condition     = strcontains(aws_s3_bucket_policy.access_logs.policy, "logging.s3.amazonaws.com") && strcontains(aws_s3_bucket_policy.access_logs.policy, "aws:SourceAccount")
     error_message = "The access-log bucket must permit only scoped S3 log delivery."
   }

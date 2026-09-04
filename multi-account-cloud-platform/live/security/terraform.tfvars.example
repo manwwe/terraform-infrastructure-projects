@@ -1,0 +1,14 @@
+aws_region             = "us-east-1"
+security_account_id    = "111111111111"
+organization_id        = "o-abcdefghij"
+audit_bucket_name      = "macp-security-audit-111111111111"
+access_log_bucket_name = "macp-security-access-111111111111"
+owner                   = "platform-team"
+
+enrolled_account_names = ["development"]
+
+member_accounts = {
+  development = { account_id = "222222222222", email = "aws-development@example.com" }
+  production  = { account_id = "333333333333", email = "aws-production@example.com" }
+  shared      = { account_id = "444444444444", email = "aws-shared@example.com" }
+}

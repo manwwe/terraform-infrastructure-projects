@@ -80,6 +80,12 @@ variable "enable_guardrails" {
   default     = false
 }
 
+variable "enable_security_delegated_admin" {
+  description = "Whether to designate the Security account for GuardDuty and Security Hub."
+  type        = bool
+  default     = false
+}
+
 variable "owner" {
   description = "Team responsible for the organization infrastructure."
   type        = string

@@ -28,3 +28,22 @@ module "initial_guardrails" {
     ]
   }
 }
+
+resource "aws_guardduty_organization_admin_account" "security" {
+  count = var.enable_security_delegated_admin ? 1 : 0
+
+  admin_account_id = module.organization.account_ids["security"]
+}
+
+resource "aws_securityhub_organization_admin_account" "security" {
+  count = var.enable_security_delegated_admin ? 1 : 0
+
+  admin_account_id = module.organization.account_ids["security"]
+}
+
+resource "aws_organizations_delegated_administrator" "config" {
+  count = var.enable_security_delegated_admin ? 1 : 0
+
+  account_id        = module.organization.account_ids["security"]
+  service_principal = "config-multiaccountsetup.amazonaws.com"
+}

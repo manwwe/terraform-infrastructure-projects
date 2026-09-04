@@ -47,6 +47,23 @@ resource "aws_kms_key" "audit" {
             "aws:SourceArn" = local.trail_arn
           }
         }
+      },
+      {
+        Sid    = "ConfigEncryption"
+        Effect = "Allow"
+        Principal = {
+          Service = "config.amazonaws.com"
+        }
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:SourceOrgID" = var.organization_id
+          }
+        }
       }
     ]
   })
@@ -189,6 +206,27 @@ resource "aws_s3_bucket_policy" "audit" {
           StringEquals = {
             "aws:SourceArn" = local.trail_arn
             "s3:x-amz-acl"  = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Sid       = "ConfigAclCheck"
+        Effect    = "Allow"
+        Principal = { Service = "config.amazonaws.com" }
+        Action    = "s3:GetBucketAcl"
+        Resource  = aws_s3_bucket.audit.arn
+        Condition = { StringEquals = { "aws:SourceOrgID" = var.organization_id } }
+      },
+      {
+        Sid       = "ConfigWrite"
+        Effect    = "Allow"
+        Principal = { Service = "config.amazonaws.com" }
+        Action    = "s3:PutObject"
+        Resource  = "${aws_s3_bucket.audit.arn}/AWSConfig/AWSLogs/*/Config/*"
+        Condition = {
+          StringEquals = {
+            "aws:SourceOrgID" = var.organization_id
+            "s3:x-amz-acl"    = "bucket-owner-full-control"
           }
         }
       }

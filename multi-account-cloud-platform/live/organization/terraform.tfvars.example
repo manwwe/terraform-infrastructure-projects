@@ -7,6 +7,7 @@ allowed_regions = [
 ]
 
 enable_guardrails = false
+enable_security_delegated_admin = false
 
 accounts = {
   security = {
