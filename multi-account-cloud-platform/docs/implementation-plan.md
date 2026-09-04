@@ -189,9 +189,9 @@
 - Create: `modules/audit-logging/outputs.tf`
 - Create: `modules/audit-logging/tests/audit.tftest.hcl`
 
-- [ ] Test encrypted, versioned, access-logged storage with public access blocked.
-- [ ] Test organization CloudTrail, log validation, and restricted bucket policies.
-- [ ] Implement lifecycle transitions without routine delete permissions.
+- [x] Test encrypted, versioned, access-logged storage with public access blocked.
+- [x] Test organization CloudTrail, log validation, and restricted bucket policies.
+- [x] Implement lifecycle transitions without routine delete permissions.
 - [ ] Deliver a test event and verify its object in the Security account.
 - [ ] Commit with `feat(audit): centralize organization audit logs`.
 
