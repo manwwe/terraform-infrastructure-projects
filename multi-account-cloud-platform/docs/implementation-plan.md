@@ -279,13 +279,13 @@
 - Create: `live/workloads/production/outputs.tf`
 - Create: `live/workloads/production/terraform.tfvars.example`
 
-- [ ] Reuse the tested module versions and production-specific inputs.
-- [ ] Require a reviewed saved plan before apply.
+- [x] Reuse the tested module versions and production-specific inputs.
+- [x] Require a reviewed saved plan before apply.
 - [ ] Deploy the baseline and one NAT gateway per Availability Zone.
 - [ ] Verify security telemetry and state access from the Security and
   Shared-services accounts.
 - [ ] Finish with a no-change plan.
-- [ ] Commit with `feat(production): deploy workload foundation`.
+- [x] Commit with `feat(production): deploy workload foundation`.
 
 ## Phase 8: CI and Operational Readiness
 
@@ -297,14 +297,14 @@
 - Create: `.github/workflows/terraform-plan.yml`
 - Create: `.github/workflows/terraform-apply.yml`
 
-- [ ] Run formatting, validation, Terraform tests, TFLint, and security scanning
+- [x] Run formatting, validation, Terraform tests, TFLint, and security scanning
   on pull requests.
-- [ ] Generate plans only for changed roots and retain them as short-lived
+- [x] Generate plans only for changed roots and retain them as short-lived
   artifacts.
-- [ ] Require protected-environment approval for applies.
-- [ ] Authenticate exclusively through GitHub OIDC.
-- [ ] Test failure paths for invalid formatting and insecure configuration.
-- [ ] Commit with `ci: add Terraform validation and deployment workflows`.
+- [x] Require protected-environment approval for applies.
+- [x] Authenticate exclusively through GitHub OIDC.
+- [x] Test failure paths for invalid formatting and insecure configuration.
+- [x] Commit with `ci: add Terraform validation and deployment workflows`.
 
 ### Task 17: Complete operating runbooks
 
@@ -318,11 +318,11 @@
 
 - [ ] Exercise recovery of an earlier S3 state version in Development.
 - [ ] Exercise removal of a faulty policy attachment.
-- [ ] Document containment and evidence-preservation steps for account compromise.
-- [ ] Document dependency-aware teardown and resources intentionally retained.
-- [ ] Update the README status and validation commands using verified results.
+- [x] Document containment and evidence-preservation steps for account compromise.
+- [x] Document dependency-aware teardown and resources intentionally retained.
+- [x] Update the README status and validation commands using verified results.
 - [ ] Run all local checks and obtain no-change plans for every deployed root.
-- [ ] Commit with `docs: complete platform operations guide`.
+- [x] Commit with `docs: complete platform operations guide`.
 
 ## Final Acceptance Checklist
 
