@@ -171,10 +171,10 @@
 - Create: `docs/access.md`
 - Create: `docs/runbooks/break-glass-access.md`
 
-- [ ] Map administrator, platform engineer, security auditor, and read-only
+- [x] Map administrator, platform engineer, security auditor, and read-only
   permission sets to the correct accounts.
-- [ ] Define MFA and short-session requirements.
-- [ ] Document break-glass credential custody, use, monitoring, and rotation.
+- [x] Define MFA and short-session requirements.
+- [x] Document break-glass credential custody, use, monitoring, and rotation.
 - [ ] Test sign-in and role assumption in each account.
 - [ ] Commit with `docs(iam): define platform access model`.
 
