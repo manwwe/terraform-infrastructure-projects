@@ -1,9 +1,19 @@
 mock_provider "aws" {
+  mock_resource "aws_lb" {
+    override_during = plan
+
+    defaults = {
+      arn        = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/example-dev/0123456789abcdef"
+      arn_suffix = "app/example-dev/0123456789abcdef"
+    }
+  }
+
   mock_resource "aws_lb_target_group" {
     override_during = plan
 
     defaults = {
-      arn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/example-dev-app/0123456789abcdef"
+      arn        = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/example-dev-app/0123456789abcdef"
+      arn_suffix = "targetgroup/example-dev/0123456789abcdef"
     }
   }
 }
@@ -51,6 +61,16 @@ run "creates_public_application_load_balancer" {
   assert {
     condition     = aws_lb.this.drop_invalid_header_fields == true
     error_message = "The load balancer must drop invalid HTTP header fields."
+  }
+
+  assert {
+    condition     = output.arn_suffix == "app/example-dev/0123456789abcdef"
+    error_message = "The module must expose the ALB ARN suffix for CloudWatch dimensions."
+  }
+
+  assert {
+    condition     = output.target_group_arn_suffix == "targetgroup/example-dev/0123456789abcdef"
+    error_message = "The module must expose the target-group ARN suffix for CloudWatch dimensions."
   }
 }
 
