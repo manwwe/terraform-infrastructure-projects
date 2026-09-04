@@ -134,6 +134,14 @@ run "enforces_production_resilience" {
     }
     error_message = "Production bootstrap must receive every environment log-group name."
   }
+
+  assert {
+    condition = strcontains(
+      file("${path.module}/templates/compute_user_data.sh.tftpl"),
+      "install -d -o snake -g snake /var/log/snake-app"
+    )
+    error_message = "Production bootstrap must create the application log directory before starting the service."
+  }
 }
 
 run "rejects_public_ingress" {

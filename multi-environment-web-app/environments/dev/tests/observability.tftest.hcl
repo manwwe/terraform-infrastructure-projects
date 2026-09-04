@@ -83,4 +83,12 @@ run "uses_development_observability_settings" {
     }
     error_message = "Development bootstrap must receive every environment log-group name."
   }
+
+  assert {
+    condition = strcontains(
+      file("${path.module}/templates/compute_user_data.sh.tftpl"),
+      "install -d -o snake -g snake /var/log/snake-app"
+    )
+    error_message = "Development bootstrap must create the application log directory before starting the service."
+  }
 }

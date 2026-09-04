@@ -29,6 +29,7 @@ DB_PORT=${database_port}
 DB_NAME=${database_name}
 ENVIRONMENT
 chmod 0600 /etc/snake-app.env
+install -d -o snake -g snake /var/log/snake-app
 
 cat > /etc/systemd/system/snake-app.service <<'SYSTEMD'
 [Unit]
