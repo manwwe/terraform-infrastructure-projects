@@ -65,6 +65,12 @@ variable "load_balancer_ingress_cidrs" {
   }
 }
 
+variable "enable_load_balancer_https" {
+  type        = bool
+  description = "Whether approved client CIDRs may reach the load balancer on TCP port 443."
+  default     = true
+}
+
 variable "tags" {
   type        = map(string)
   description = "Additional tags applied to all security groups."
