@@ -1,0 +1,17 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ProtectBucketPublicAccessBlocks",
+            "Effect": "Deny",
+            "Action": ["s3:DeleteBucketPublicAccessBlock"],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ProtectAccountPublicAccessBlock",
+            "Effect": "Deny",
+            "Action": ["s3:PutAccountPublicAccessBlock"],
+            "Resource": "*"
+        }
+    ]
+}
