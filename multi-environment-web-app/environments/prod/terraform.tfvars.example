@@ -1,0 +1,6 @@
+owner              = "replace-with-owner"
+aws_region         = "us-east-1"
+availability_zones = ["us-east-1a", "us-east-1b"]
+
+# Documentation-only range: replace it with approved client CIDRs before planning.
+load_balancer_ingress_cidrs = ["203.0.113.0/24"]
