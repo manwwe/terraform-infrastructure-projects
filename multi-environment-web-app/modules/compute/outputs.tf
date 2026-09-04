@@ -12,3 +12,18 @@ output "autoscaling_group_arn" {
   description = "ARN of the application Auto Scaling group."
   value       = aws_autoscaling_group.this.arn
 }
+
+output "min_size" {
+  description = "Minimum Auto Scaling group capacity."
+  value       = aws_autoscaling_group.this.min_size
+}
+
+output "desired_capacity" {
+  description = "Desired Auto Scaling group capacity."
+  value       = aws_autoscaling_group.this.desired_capacity
+}
+
+output "max_size" {
+  description = "Maximum Auto Scaling group capacity."
+  value       = aws_autoscaling_group.this.max_size
+}
