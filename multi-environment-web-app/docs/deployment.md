@@ -132,10 +132,9 @@ aws logs tail /multi-environment-web-app-dev/application --since 30m
 The environment also publishes Nginx and cloud-init logs. Do not print the
 application environment file or Secrets Manager values into logs.
 
-## Plan Production Without Applying
+## Deploy Production
 
-The production root is a validated configuration, not an authorization to create
-resources. Verify the intended AWS account before initializing it:
+Verify the intended AWS account before initializing production:
 
 ```bash
 aws sts get-caller-identity
@@ -153,15 +152,44 @@ with the development key. Replace the documentation-only ingress CIDR in
 terraform init -backend-config=backend.hcl
 terraform validate
 terraform test
-terraform plan -var-file=terraform.tfvars -out=prod.tfplan
-terraform show -no-color prod.tfplan
+terraform plan -var-file=terraform.tfvars -out=tfplan
+terraform show -no-color tfplan
 ```
 
 The review must confirm two NAT gateways, Multi-AZ RDS, deletion protection, a
 required final snapshot, 30-day backup retention, two desired EC2 instances, a
-maximum of four, and restricted HTTP ingress. Do not run `terraform apply` for
-this stage, and do not commit `backend.hcl`, `terraform.tfvars`, or plan files.
+maximum of four, and restricted HTTP ingress. Apply only the reviewed saved plan:
+
+```bash
+terraform apply tfplan
+```
+
+Do not commit `backend.hcl`, `terraform.tfvars`, or plan files.
 
 For production inspection, use the alarm prefix
 `multi-environment-web-app-prod-` and log-group prefix
 `/multi-environment-web-app-prod/`.
+
+## Deployment Record
+
+As of September 4, 2026 UTC, the development environment was destroyed and the
+production environment was deployed and verified in AWS account `924594387630`,
+Region `us-east-1`.
+
+Key production outputs:
+
+```text
+application_load_balancer_dns_name = "multi-environment-web-app-prod-a-1859276092.us-east-1.elb.amazonaws.com"
+database_instance_identifier      = "multi-environment-web-app-prod-postgresql"
+database_master_user_secret_arn   = "arn:aws:secretsmanager:us-east-1:924594387630:secret:rds!db-28dc0b96-28bd-4f7c-9278-2f5eb2bba355-WjSs69"
+```
+
+Verification results:
+
+```text
+Dev destroy: 56 destroyed; dev state list returned no resources.
+Prod apply: 58 added, 0 changed, 0 destroyed.
+Prod health: HTTP 200 with {"status":"healthy"}.
+Prod drift check: No changes.
+Prod CloudWatch alarms: 5 OK, 0 in alarm, 0 insufficient data.
+```

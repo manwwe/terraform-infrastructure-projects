@@ -1,6 +1,6 @@
 # Multi-Environment Web Application
 
-> **Status:** Development deployed and verified; production configuration validated but not applied
+> **Status:** Development deployed, verified, and destroyed; production deployed and verified
 
 This project runs a small Flask Snake game on AWS. Scores are stored in Amazon
 RDS for PostgreSQL. Terraform creates a three-tier network, an internet-facing
@@ -21,8 +21,8 @@ private database.
 - CloudWatch collection for application, Nginx, and cloud-init logs
 - Essential ALB, Auto Scaling, EC2 CPU, RDS CPU, and RDS storage alarms
 
-Client traffic currently uses HTTP on port 80. HTTPS, DNS, production deployment,
-CI, and CloudWatch application log shipping are outside the current implementation.
+Client traffic currently uses HTTP on port 80. HTTPS, DNS, CI, and CloudWatch
+application log shipping are outside the current implementation.
 
 ## Repository Layout
 
@@ -31,8 +31,8 @@ multi-environment-web-app/
 ├── application/       Flask application, Snake game, and Python tests
 ├── bootstrap/         S3 remote-state bootstrap configuration
 ├── docs/              Architecture and operating guides
-├── environments/dev/  Deployed development root module
-├── environments/prod/ Validated, unapplied production root module
+├── environments/dev/  Development root module
+├── environments/prod/ Deployed production root module
 └── modules/            Reusable infrastructure and observability modules
 ```
 
@@ -49,10 +49,16 @@ Follow the [development deployment guide](docs/deployment.md). It covers remote
 state bootstrap, local ignored configuration files, validation, planning,
 deployment, and health checks.
 
-After deployment, print the application URL from `environments/dev`:
+After deployment, print the application URL from the target environment:
 
 ```bash
 echo "http://$(terraform output -raw application_load_balancer_dns_name)"
+```
+
+Current production URL:
+
+```text
+http://multi-environment-web-app-prod-a-1859276092.us-east-1.elb.amazonaws.com
 ```
 
 ## Validation
@@ -87,7 +93,6 @@ remain to be automated.
 ## Current Limitations
 
 - Client traffic is HTTP rather than HTTPS.
-- Production has not been applied and therefore has no production AWS resources.
 - Development still uses one EC2 instance, one NAT gateway, and Single-AZ RDS to
   limit cost.
 - Alarm notifications and CloudWatch dashboards are not configured.
