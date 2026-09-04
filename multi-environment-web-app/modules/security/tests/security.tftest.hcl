@@ -9,8 +9,8 @@ mock_provider "aws" {
 }
 
 variables {
-  name_prefix                  = "example-prod"
-  vpc_id                       = "vpc-0123456789abcdef0"
+  name_prefix                 = "example-prod"
+  vpc_id                      = "vpc-0123456789abcdef0"
   application_port            = 80
   database_port               = 5432
   load_balancer_ingress_cidrs = ["203.0.113.0/24"]
