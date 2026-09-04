@@ -1,0 +1,14 @@
+shared_services_account_id = "111122223333"
+management_account_id      = "444455556666"
+state_bucket_name          = "macp-shared-terraform-state-example"
+state_kms_key_arn          = "arn:aws:kms:us-east-1:444455556666:key/00000000-0000-0000-0000-000000000000"
+github_repository          = "example/terraform-infrastructure-projects"
+owner                      = "platform-team"
+
+# Enable after a workload VPC exists.
+# private_dns = {
+#   zone_name = "internal.example.com"
+#   vpc_associations = {
+#     development = { vpc_id = "vpc-0123456789abcdef0", vpc_region = "us-east-1" }
+#   }
+# }

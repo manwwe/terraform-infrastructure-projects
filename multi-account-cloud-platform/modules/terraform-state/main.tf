@@ -7,10 +7,36 @@ locals {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_kms_key" "state" {
   description             = "Encrypts Terraform state for ${var.project_name}"
   deletion_window_in_days = 30
   enable_key_rotation     = true
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      [{
+        Sid       = "EnableAccountAdministration"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      }],
+      length(var.authorized_principal_arns) == 0 ? [] : [{
+        Sid       = "AllowTerraformStateEncryption"
+        Effect    = "Allow"
+        Principal = { AWS = sort(tolist(var.authorized_principal_arns)) }
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = "*"
+      }]
+    )
+  })
 
   tags = merge(local.common_tags, {
     Name = "${var.project_name}-${var.environment}-terraform-state"
@@ -81,8 +107,8 @@ resource "aws_s3_bucket_policy" "state" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
+    Statement = concat(
+      [{
         Sid       = "DenyInsecureTransport"
         Effect    = "Deny"
         Principal = "*"
@@ -96,8 +122,24 @@ resource "aws_s3_bucket_policy" "state" {
             "aws:SecureTransport" = "false"
           }
         }
-      }
-    ]
+      }],
+      length(var.authorized_principal_arns) == 0 ? [] : [
+        {
+          Sid       = "AllowTerraformStateBucketAccess"
+          Effect    = "Allow"
+          Principal = { AWS = sort(tolist(var.authorized_principal_arns)) }
+          Action    = ["s3:GetBucketLocation", "s3:ListBucket"]
+          Resource  = aws_s3_bucket.state.arn
+        },
+        {
+          Sid       = "AllowTerraformStateObjectAccess"
+          Effect    = "Allow"
+          Principal = { AWS = sort(tolist(var.authorized_principal_arns)) }
+          Action    = ["s3:DeleteObject", "s3:GetObject", "s3:PutObject"]
+          Resource  = "${aws_s3_bucket.state.arn}/*"
+        }
+      ]
+    )
   })
 
   depends_on = [aws_s3_bucket_public_access_block.state]

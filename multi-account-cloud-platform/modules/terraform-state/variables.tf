@@ -46,3 +46,17 @@ variable "environment" {
   type        = string
   default     = "shared"
 }
+
+variable "authorized_principal_arns" {
+  description = "Cross-account IAM roles allowed to read, write, and lock Terraform state."
+  type        = set(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for arn in var.authorized_principal_arns :
+      can(regex("^arn:(aws|aws-us-gov|aws-cn):iam::[0-9]{12}:role/.+$", arn))
+    ])
+    error_message = "Every authorized principal must be an IAM role ARN."
+  }
+}

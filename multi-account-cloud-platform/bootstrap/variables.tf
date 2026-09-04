@@ -38,3 +38,9 @@ variable "project_name" {
   type        = string
   default     = "multi-account-cloud-platform"
 }
+
+variable "authorized_principal_arns" {
+  description = "Cross-account deployment roles allowed to use the state backend."
+  type        = set(string)
+  default     = []
+}
