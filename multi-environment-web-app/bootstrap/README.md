@@ -1,5 +1,9 @@
 # Backend Bootstrap
 
+> **Status:** Implemented and documented. The bootstrap root creates the shared
+> S3 backend prerequisites; its state and account-specific configuration remain
+> environment-specific and are intentionally excluded from Git.
+
 This root module creates the S3 bucket used by the development and production Terraform backends.
 
 ## Resources

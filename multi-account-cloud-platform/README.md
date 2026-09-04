@@ -1,7 +1,9 @@
 # Multi-Account Cloud Platform
 
-> **Status:** Foundation implemented through Production and CI; Security, Shared
-> Services, Development, and Production plans are prepared but not applied.
+> **Status:** Terraform foundation and CI are implemented for Organization,
+> Security, Shared Services, Development, and Production. Deployment plans are
+> prepared, but final AWS verification, no-change plans, and recovery exercises
+> remain pending.
 
 This project builds a small AWS multi-account foundation with Terraform. It is
 intended as a portfolio project, so the design demonstrates account isolation,
@@ -20,8 +22,8 @@ trying to reproduce a full enterprise landing zone.
 - Reusable Terraform modules and account-specific root configurations
 - CI checks for formatting, validation, security, and Terraform plans
 
-See [Architecture](docs/architecture.md) for the complete design and
-[Implementation plan](docs/implementation-plan.md) for the ordered build steps.
+See [Architecture](docs/architecture.md) for the complete design and the
+deployment and operations guides for the ordered rollout and maintenance steps.
 
 ## Repository Layout
 
@@ -81,7 +83,6 @@ the successful plan run ID and the exact commit SHA that created the plan.
 ## Documentation
 
 - [Architecture](docs/architecture.md)
-- [Implementation plan](docs/implementation-plan.md)
 - [Deployment workflow](docs/deployment-workflow.md)
 - [Security and operations](docs/security-and-operations.md)
 - [Access model](docs/access.md)

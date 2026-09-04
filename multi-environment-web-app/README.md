@@ -1,6 +1,8 @@
 # Multi-Environment Web Application
 
-> **Status:** Development deployed, verified, and destroyed; production deployed and verified
+> **Status:** Production is deployed and verified; the development environment
+> was deployed, verified, and destroyed. Remaining work is limited to optional
+> operational improvements, broader automated coverage, and recovery testing.
 
 This project runs a small Flask Snake game on AWS. Scores are stored in Amazon
 RDS for PostgreSQL. Terraform creates a three-tier network, an internet-facing
@@ -87,7 +89,6 @@ remain to be automated.
 - [Security](docs/security.md)
 - [Testing](docs/testing.md)
 - [State management](docs/state-management.md)
-- [Implementation status](docs/implementation-plan.md)
 - [Architecture decisions](docs/decisions/)
 
 ## Current Limitations

@@ -15,7 +15,6 @@ required_files=(
   "README.md"
   "docs/architecture.md"
   "docs/deployment-workflow.md"
-  "docs/implementation-plan.md"
   "docs/naming-and-tagging.md"
   "docs/security-and-operations.md"
 )
