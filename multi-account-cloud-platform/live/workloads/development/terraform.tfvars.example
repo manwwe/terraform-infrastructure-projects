@@ -1,0 +1,13 @@
+development_account_id    = "111122223333"
+management_account_id     = "444455556666"
+github_repository         = "example/terraform-infrastructure-projects"
+owner                     = "platform-team"
+config_bucket_name        = "macp-security-audit-example"
+budget_notification_email = "platform@example.com"
+monthly_budget_usd        = 25
+
+# Set this to the live/security audit_kms_key_arn output after Task 11 is applied.
+# config_kms_key_arn = "arn:aws:kms:us-east-1:777788889999:key/00000000-0000-0000-0000-000000000000"
+
+# Enable after Shared Services authorizes this VPC association.
+# private_zone_id = "Z0123456789ABCDEFGHIJ"

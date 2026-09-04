@@ -224,11 +224,11 @@
 - Create: `live/shared-services/variables.tf`
 - Create: `live/shared-services/outputs.tf`
 
-- [ ] Manage the existing state resources without attempting replacement.
-- [ ] Add CI OIDC providers and narrowly scoped deployment-role trust.
-- [ ] Create the optional private parent DNS zone.
+- [x] Manage the existing state resources without attempting replacement.
+- [x] Add CI OIDC providers and narrowly scoped deployment-role trust.
+- [x] Create the optional private parent DNS zone.
 - [ ] Verify remote-state access from every deployment role.
-- [ ] Commit with `feat(shared-services): add platform services`.
+- [x] Commit with `feat(shared-services): add platform services`.
 
 ## Phase 7: Workload Account Foundations
 
@@ -241,13 +241,13 @@
 - Create: `modules/vpc/outputs.tf`
 - Create: `modules/vpc/tests/vpc.tftest.hcl`
 
-- [ ] Test two Availability Zones, public and private subnets, flow logs, and no
+- [x] Test two Availability Zones, public and private subnets, flow logs, and no
   default security-group ingress or egress.
-- [ ] Test one NAT gateway for Development and one per Availability Zone for
+- [x] Test one NAT gateway for Development and one per Availability Zone for
   Production.
-- [ ] Implement the network resources and stable subnet outputs.
+- [x] Implement the network resources and stable subnet outputs.
 - [ ] Run Terraform tests, TFLint, and security scanning.
-- [ ] Commit with `feat(network): add workload VPC module`.
+- [x] Commit with `feat(network): add workload VPC module`.
 
 ### Task 14: Deploy Development baseline
 
@@ -266,7 +266,7 @@
   state access, and budget configuration.
 - [ ] Destroy and restore the disposable VPC to test recovery instructions.
 - [ ] Finish with a no-change plan.
-- [ ] Commit with `feat(development): deploy workload foundation`.
+- [x] Commit with `feat(development): deploy workload foundation`.
 
 ### Task 15: Deploy Production baseline
 
