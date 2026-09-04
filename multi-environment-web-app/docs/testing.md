@@ -60,7 +60,7 @@ and variable files; it is not required for mocked test coverage.
 
 Observability tests verify three environment-specific log groups, retention,
 alarm namespaces and dimensions, thresholds, missing-data behavior, disabled
-actions, and development/production settings. Root tests also verify that all
+actions, and development/production settings. Environment tests also verify that all
 three log-group names flow into the compute bootstrap template.
 
 ## Deployment Verification
