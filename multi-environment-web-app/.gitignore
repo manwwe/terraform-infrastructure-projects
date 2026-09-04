@@ -25,6 +25,11 @@ terraform.rc
 crash.log
 crash.*.log
 
+# Python test and bytecode artifacts
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
 # Override files
 override.tf
 override.tf.json
