@@ -72,6 +72,11 @@ run "creates_private_hardened_compute" {
   }
 
   assert {
+    condition     = toset(aws_autoscaling_group.this.enabled_metrics) == toset(["GroupInServiceInstances"])
+    error_message = "The Auto Scaling group must publish its in-service capacity metric."
+  }
+
+  assert {
     condition = (
       aws_autoscaling_group.this.instance_refresh[0].strategy == "Rolling" &&
       aws_autoscaling_group.this.instance_refresh[0].preferences[0].min_healthy_percentage == 100 &&

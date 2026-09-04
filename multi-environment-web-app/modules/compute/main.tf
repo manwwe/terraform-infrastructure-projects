@@ -71,6 +71,7 @@ resource "aws_autoscaling_group" "this" {
 
   vpc_zone_identifier = sort(tolist(var.application_subnet_ids))
   target_group_arns   = sort(tolist(var.target_group_arns))
+  enabled_metrics     = ["GroupInServiceInstances"]
 
   health_check_type         = length(var.target_group_arns) > 0 ? "ELB" : "EC2"
   health_check_grace_period = 300
