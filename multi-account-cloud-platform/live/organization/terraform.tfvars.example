@@ -1,0 +1,35 @@
+aws_region           = "us-east-1"
+management_account_id = "111111111111"
+owner                 = "platform-team"
+
+allowed_regions = [
+  "us-east-1"
+]
+
+enable_guardrails = false
+
+accounts = {
+  security = {
+    name                = "Security"
+    email               = "aws-security@example.com"
+    organizational_unit = "security"
+  }
+
+  shared_services = {
+    name                = "Shared Services"
+    email               = "aws-shared@example.com"
+    organizational_unit = "infrastructure"
+  }
+
+  development = {
+    name                = "Development"
+    email               = "aws-development@example.com"
+    organizational_unit = "workloads"
+  }
+
+  production = {
+    name                = "Production"
+    email               = "aws-production@example.com"
+    organizational_unit = "workloads"
+  }
+}
