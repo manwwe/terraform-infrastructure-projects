@@ -4,6 +4,19 @@ Start with read-only checks. Do not apply a new plan, force-unlock state, untain
 resource, or replace an instance until its actual AWS and Terraform states are
 understood.
 
+Inspect the affected environment's alarms and recent application logs before
+restarting or replacing resources:
+
+```bash
+aws cloudwatch describe-alarms \
+  --alarm-name-prefix multi-environment-web-app-dev-
+aws logs tail /multi-environment-web-app-dev/application --since 30m
+```
+
+Use the production prefixes when diagnosing production. Also inspect the Nginx
+and cloud-init groups when failures occur during routing or bootstrap. Never print
+`/etc/snake-app.env` or secret values into terminal or CloudWatch output.
+
 For production, first confirm that the backend key ends in
 `/prod/terraform.tfstate`. Multi-AZ RDS can fail over to its standby, and each
 application subnet has a same-AZ NAT gateway. Diagnose the failed layer before

@@ -18,6 +18,8 @@ private database.
 - Encrypted, versioned S3 remote state with native locking
 - An isolated production root with dual NAT gateways, Multi-AZ RDS, and a
   two-instance minimum
+- CloudWatch collection for application, Nginx, and cloud-init logs
+- Essential ALB, Auto Scaling, EC2 CPU, RDS CPU, and RDS storage alarms
 
 Client traffic currently uses HTTP on port 80. HTTPS, DNS, production deployment,
 CI, and CloudWatch application log shipping are outside the current implementation.
@@ -31,7 +33,7 @@ multi-environment-web-app/
 ├── docs/              Architecture and operating guides
 ├── environments/dev/  Deployed development root module
 ├── environments/prod/ Validated, unapplied production root module
-└── modules/            Reusable Terraform modules
+└── modules/            Reusable infrastructure and observability modules
 ```
 
 ## Prerequisites
@@ -57,6 +59,7 @@ echo "http://$(terraform output -raw application_load_balancer_dns_name)"
 
 ```bash
 terraform fmt -check -recursive .
+terraform -chdir=modules/observability test
 terraform -chdir=environments/prod test
 terraform -chdir=modules/security test
 terraform -chdir=modules/compute test
@@ -87,6 +90,6 @@ remain to be automated.
 - Production has not been applied and therefore has no production AWS resources.
 - Development still uses one EC2 instance, one NAT gateway, and Single-AZ RDS to
   limit cost.
-- CloudWatch application/system log shipping and alarms are not configured.
+- Alarm notifications and CloudWatch dashboards are not configured.
 - CI, linting, security scanning, and tests for several infrastructure modules
   remain future work.

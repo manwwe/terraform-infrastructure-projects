@@ -119,6 +119,19 @@ aws ssm describe-instance-information
 The target should become healthy, the Auto Scaling group should meet desired
 capacity, and its instance should appear online in Systems Manager.
 
+Inspect development alarms and log delivery without retrieving secret values:
+
+```bash
+aws cloudwatch describe-alarms \
+  --alarm-name-prefix multi-environment-web-app-dev-
+aws logs describe-log-groups \
+  --log-group-name-prefix /multi-environment-web-app-dev/
+aws logs tail /multi-environment-web-app-dev/application --since 30m
+```
+
+The environment also publishes Nginx and cloud-init logs. Do not print the
+application environment file or Secrets Manager values into logs.
+
 ## Plan Production Without Applying
 
 The production root is a validated configuration, not an authorization to create
@@ -148,3 +161,7 @@ The review must confirm two NAT gateways, Multi-AZ RDS, deletion protection, a
 required final snapshot, 30-day backup retention, two desired EC2 instances, a
 maximum of four, and restricted HTTP ingress. Do not run `terraform apply` for
 this stage, and do not commit `backend.hcl`, `terraform.tfvars`, or plan files.
+
+For production inspection, use the alarm prefix
+`multi-environment-web-app-prod-` and log-group prefix
+`/multi-environment-web-app-prod/`.

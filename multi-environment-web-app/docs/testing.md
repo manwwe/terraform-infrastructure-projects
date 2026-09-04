@@ -5,7 +5,8 @@
 The application has 28 Python tests covering routes, score validation, database
 behavior, retries, and secret handling. The compute module has 6 Terraform test
 runs, the load-balancer module has 4, the security module has 2, and the
-production root has 2.
+observability module has 2. The development root has 1 observability run, and the
+production root has 2 runs covering resilience and observability.
 
 From the project directory, run:
 
@@ -13,11 +14,14 @@ From the project directory, run:
 terraform fmt -check -recursive .
 terraform -chdir=environments/dev init -backend=false
 terraform -chdir=environments/dev validate
+terraform -chdir=environments/dev test
 terraform -chdir=environments/prod init -backend=false
 terraform -chdir=environments/prod validate
 terraform -chdir=environments/prod test
 terraform -chdir=modules/security init -backend=false
 terraform -chdir=modules/security test
+terraform -chdir=modules/observability init -backend=false
+terraform -chdir=modules/observability test
 terraform -chdir=modules/compute init -backend=false
 terraform -chdir=modules/compute test
 terraform -chdir=modules/load-balancer init -backend=false
@@ -54,6 +58,11 @@ CIDR-restricted HTTP ingress, and disabled HTTPS ingress. A credentialed
 speculative plan is separate and should run only with verified production backend
 and variable files; it is not required for mocked test coverage.
 
+Observability tests verify three environment-specific log groups, retention,
+alarm namespaces and dimensions, thresholds, missing-data behavior, disabled
+actions, and development/production settings. Root tests also verify that all
+three log-group names flow into the compute bootstrap template.
+
 ## Deployment Verification
 
 After deployment:
@@ -71,4 +80,4 @@ After deployment:
 - TFLint and Terraform security scanning
 - CI automation
 - Auto Scaling instance-replacement testing
-- CloudWatch log and alarm verification, after observability is implemented
+- Live CloudWatch agent and alarm-state verification after an approved deployment

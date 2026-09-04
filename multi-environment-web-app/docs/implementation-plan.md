@@ -17,10 +17,12 @@
 - [x] Production dual NAT, Multi-AZ RDS, backups, deletion protection, and final snapshots
 - [x] Production Auto Scaling capacity and restricted HTTP ingress
 - [x] Mocked production safeguard and security-module tests
+- [x] CloudWatch application, Nginx, and cloud-init log shipping
+- [x] Essential ALB, Auto Scaling, EC2, and RDS alarms
 
 ## Remaining
 
-- [ ] Add CloudWatch application/system log shipping, metrics, and alarms
+- [ ] Add alarm notifications and dashboards if operational requirements need them
 - [ ] Add Terraform tests for network, IAM, and RDS modules
 - [ ] Add TFLint, security scanning, and CI workflows
 - [ ] Test Auto Scaling replacement and document observed recovery behavior

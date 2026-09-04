@@ -11,6 +11,8 @@
 - The instance role can read only the configured RDS-managed secret.
 - Public access to the state bucket is blocked, and state changes use native S3
   lock files.
+- EC2 can write only to the three CloudWatch log groups created for its
+  environment.
 
 ## Network Boundaries
 
@@ -39,8 +41,8 @@ application health and service logs without printing Secrets Manager values.
 
 Client traffic uses unencrypted HTTP. HTTPS and DNS are outside the current scope.
 The application uses the RDS master credential; a future change should use a
-restricted application user. CloudWatch application/system log shipping and
-alarms are not configured.
+restricted application user. CloudWatch alarm notifications and dashboards are
+not configured.
 
 ## Production Safeguards
 

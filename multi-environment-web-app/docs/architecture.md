@@ -65,6 +65,17 @@ The development root stores state in an encrypted, versioned S3 bucket with
 native S3 lock files. Bootstrap and development state remain separate. Local
 `backend.hcl` and `terraform.tfvars` files are ignored by Git.
 
+## Observability
+
+Each environment creates three CloudWatch log groups for the Snake application,
+Nginx, and cloud-init. The EC2 role can write only to those environment-specific
+groups. Development retains these logs for 7 days; production retains them for
+30 days.
+
+Five CloudWatch alarms cover unhealthy ALB targets, insufficient Auto Scaling
+capacity, high EC2 CPU, high RDS CPU, and low RDS free storage. The alarms do not
+have notification actions, and no dashboard is configured.
+
 ## Availability and Cost Choices
 
 The ALB and Auto Scaling group span two Availability Zones. Development keeps one
