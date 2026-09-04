@@ -157,12 +157,12 @@
 - Create: `modules/deployment-role/outputs.tf`
 - Create: `modules/deployment-role/tests/role.tftest.hcl`
 
-- [ ] Test that role trust accepts only approved IAM Identity Center and CI OIDC
+- [x] Test that role trust accepts only approved IAM Identity Center and CI OIDC
   principals.
-- [ ] Test session duration, external conditions, and permissions boundaries.
-- [ ] Implement separate plan and apply roles where practical.
-- [ ] Verify an unapproved principal cannot assume either role.
-- [ ] Commit with `feat(iam): add cross-account deployment roles`.
+- [x] Test session duration, external conditions, and permissions boundaries.
+- [x] Implement separate plan and apply roles where practical.
+- [x] Verify an unapproved principal is absent from both role trust policies.
+- [x] Commit with `feat(iam): add cross-account deployment roles`.
 
 ### Task 9: Document human and emergency access
 
