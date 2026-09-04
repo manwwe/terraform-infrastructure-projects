@@ -1,8 +1,14 @@
-# Development Recovery
+# Environment Recovery
 
 Start with read-only checks. Do not apply a new plan, force-unlock state, untaint a
 resource, or replace an instance until its actual AWS and Terraform states are
 understood.
+
+For production, first confirm that the backend key ends in
+`/prod/terraform.tfstate`. Multi-AZ RDS can fail over to its standby, and each
+application subnet has a same-AZ NAT gateway. Diagnose the failed layer before
+changing capacity or routing. Deletion protection must remain enabled during
+recovery, and automated backups are retained for 30 days.
 
 ## Failed Apply but Auto Scaling Later Recovers
 

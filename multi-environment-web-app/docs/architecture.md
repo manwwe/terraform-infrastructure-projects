@@ -1,4 +1,4 @@
-# Development Architecture
+# Multi-Environment Architecture
 
 ![Development AWS architecture](diagrams/development-architecture.svg)
 
@@ -72,8 +72,19 @@ EC2 instance, one NAT gateway, and a Single-AZ RDS instance to control cost. The
 Auto Scaling group replaces failed instances, but a single desired instance does
 not provide uninterrupted compute availability during replacement.
 
+## Production Design
+
+The production root reuses the same three-tier modules in a separate VPC and
+state object. It creates one NAT gateway per Availability Zone, configures RDS
+for Multi-AZ operation with 30-day backups and deletion protection, and maintains
+two EC2 instances with an Auto Scaling range of 2–4. The load balancer accepts
+HTTP only from explicitly approved CIDRs, and its unused port 443 ingress is
+disabled.
+
+This configuration has been validated and tested with mocked providers but has
+not been applied. No production AWS resources exist as part of this stage.
+
 ## Scope
 
-Production is not implemented. HTTPS, Route 53, a custom domain, CloudWatch
-application/system log shipping, and alarms are outside the current
-implementation.
+HTTPS, Route 53, a custom domain, CloudWatch application/system log shipping, and
+alarms are outside the current implementation.

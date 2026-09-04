@@ -13,16 +13,18 @@
 - [x] Flask Snake game with database-backed scores
 - [x] Internet-facing HTTP Application Load Balancer and health checks
 - [x] Development deployment and end-to-end health verification
+- [x] Isolated production root and remote-state key
+- [x] Production dual NAT, Multi-AZ RDS, backups, deletion protection, and final snapshots
+- [x] Production Auto Scaling capacity and restricted HTTP ingress
+- [x] Mocked production safeguard and security-module tests
 
 ## Remaining
 
-- [ ] Create the production root configuration and isolated state
-- [ ] Configure production capacity, Multi-AZ RDS, backups, and deletion protection
 - [ ] Add CloudWatch application/system log shipping, metrics, and alarms
-- [ ] Add Terraform tests for network, security, IAM, and RDS modules
+- [ ] Add Terraform tests for network, IAM, and RDS modules
 - [ ] Add TFLint, security scanning, and CI workflows
 - [ ] Test Auto Scaling replacement and document observed recovery behavior
-- [ ] Validate production plans after production is implemented
+- [ ] Run a credentialed speculative production plan with approved local configuration
 
 ## Out of Scope
 

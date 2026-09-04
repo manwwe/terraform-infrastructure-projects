@@ -5,12 +5,19 @@
 The bootstrap root creates an Amazon S3 bucket with server-side encryption,
 versioning, public-access blocking, and deletion safeguards. Development stores
 Terraform state in that bucket and uses native S3 lock files through
-`use_lockfile = true`.
+`use_lockfile = true`. Production is configured to use a different state object
+in the same protected backend.
 
 The development state key is:
 
 ```text
 multi-environment-web-app/dev/terraform.tfstate
+```
+
+The production state key is:
+
+```text
+multi-environment-web-app/prod/terraform.tfstate
 ```
 
 The local `backend.hcl` file selects the bucket, key, Region, encryption, and lock
@@ -31,9 +38,10 @@ The detailed commands and safeguards are in
 
 ## Environment Isolation
 
-Only development is implemented. A future production root must use a different
-state key and stricter operator permissions; it must not share the development
-state object.
+Development and production use separate roots and keys. Confirm the exact key
+before every initialization, plan, state command, or apply. Production must never
+share the development state object. Access policies should scope operators to
+only the environment state and lock objects they require.
 
 ## Lock Recovery
 

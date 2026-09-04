@@ -1,6 +1,6 @@
 # Multi-Environment Web Application
 
-> **Status:** Development environment deployed and verified
+> **Status:** Development deployed and verified; production configuration validated but not applied
 
 This project runs a small Flask Snake game on AWS. Scores are stored in Amazon
 RDS for PostgreSQL. Terraform creates a three-tier network, an internet-facing
@@ -16,9 +16,11 @@ private database.
 - Systems Manager administration without SSH
 - RDS-managed credentials in Secrets Manager
 - Encrypted, versioned S3 remote state with native locking
+- An isolated production root with dual NAT gateways, Multi-AZ RDS, and a
+  two-instance minimum
 
-Client traffic currently uses HTTP on port 80. HTTPS, DNS, production, CI, and
-CloudWatch application log shipping are outside the current implementation.
+Client traffic currently uses HTTP on port 80. HTTPS, DNS, production deployment,
+CI, and CloudWatch application log shipping are outside the current implementation.
 
 ## Repository Layout
 
@@ -28,6 +30,7 @@ multi-environment-web-app/
 ├── bootstrap/         S3 remote-state bootstrap configuration
 ├── docs/              Architecture and operating guides
 ├── environments/dev/  Deployed development root module
+├── environments/prod/ Validated, unapplied production root module
 └── modules/            Reusable Terraform modules
 ```
 
@@ -54,6 +57,8 @@ echo "http://$(terraform output -raw application_load_balancer_dns_name)"
 
 ```bash
 terraform fmt -check -recursive .
+terraform -chdir=environments/prod test
+terraform -chdir=modules/security test
 terraform -chdir=modules/compute test
 terraform -chdir=modules/load-balancer test
 
@@ -78,10 +83,10 @@ remain to be automated.
 
 ## Current Limitations
 
-- Only the development environment is implemented.
 - Client traffic is HTTP rather than HTTPS.
-- Development uses one EC2 instance, one NAT gateway, and Single-AZ RDS to limit
-  cost.
+- Production has not been applied and therefore has no production AWS resources.
+- Development still uses one EC2 instance, one NAT gateway, and Single-AZ RDS to
+  limit cost.
 - CloudWatch application/system log shipping and alarms are not configured.
 - CI, linting, security scanning, and tests for several infrastructure modules
   remain future work.

@@ -118,3 +118,33 @@ aws ssm describe-instance-information
 
 The target should become healthy, the Auto Scaling group should meet desired
 capacity, and its instance should appear online in Systems Manager.
+
+## Plan Production Without Applying
+
+The production root is a validated configuration, not an authorization to create
+resources. Verify the intended AWS account before initializing it:
+
+```bash
+aws sts get-caller-identity
+cd ../prod
+cp backend.hcl.example backend.hcl
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Set the existing state bucket in `backend.hcl`. Confirm that its key is exactly
+`multi-environment-web-app/prod/terraform.tfstate`; never initialize production
+with the development key. Replace the documentation-only ingress CIDR in
+`terraform.tfvars` with approved client CIDRs.
+
+```bash
+terraform init -backend-config=backend.hcl
+terraform validate
+terraform test
+terraform plan -var-file=terraform.tfvars -out=prod.tfplan
+terraform show -no-color prod.tfplan
+```
+
+The review must confirm two NAT gateways, Multi-AZ RDS, deletion protection, a
+required final snapshot, 30-day backup retention, two desired EC2 instances, a
+maximum of four, and restricted HTTP ingress. Do not run `terraform apply` for
+this stage, and do not commit `backend.hcl`, `terraform.tfvars`, or plan files.

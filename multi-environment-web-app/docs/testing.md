@@ -4,7 +4,8 @@
 
 The application has 28 Python tests covering routes, score validation, database
 behavior, retries, and secret handling. The compute module has 6 Terraform test
-runs, and the load-balancer module has 4 Terraform test runs.
+runs, the load-balancer module has 4, the security module has 2, and the
+production root has 2.
 
 From the project directory, run:
 
@@ -12,6 +13,11 @@ From the project directory, run:
 terraform fmt -check -recursive .
 terraform -chdir=environments/dev init -backend=false
 terraform -chdir=environments/dev validate
+terraform -chdir=environments/prod init -backend=false
+terraform -chdir=environments/prod validate
+terraform -chdir=environments/prod test
+terraform -chdir=modules/security init -backend=false
+terraform -chdir=modules/security test
 terraform -chdir=modules/compute init -backend=false
 terraform -chdir=modules/compute test
 terraform -chdir=modules/load-balancer init -backend=false
@@ -41,6 +47,13 @@ Review for unexpected replacement or deletion, changes to public exposure,
 private subnet placement, encryption, IAM scope, and environment-specific cost
 settings.
 
+Production tests use a mocked AWS provider and create no resources. They verify
+dual NAT gateways, two application subnets, Multi-AZ RDS, deletion protection,
+required final snapshots, 30-day backups, Auto Scaling capacity 2/2/4,
+CIDR-restricted HTTP ingress, and disabled HTTPS ingress. A credentialed
+speculative plan is separate and should run only with verified production backend
+and variable files; it is not required for mocked test coverage.
+
 ## Deployment Verification
 
 After deployment:
@@ -58,5 +71,4 @@ After deployment:
 - TFLint and Terraform security scanning
 - CI automation
 - Auto Scaling instance-replacement testing
-- Production plans and safeguards, after production is implemented
 - CloudWatch log and alarm verification, after observability is implemented

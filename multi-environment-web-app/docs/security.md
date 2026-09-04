@@ -38,11 +38,15 @@ application health and service logs without printing Secrets Manager values.
 ## Current Limitations
 
 Client traffic uses unencrypted HTTP. HTTPS and DNS are outside the current scope.
-The application uses the RDS master credential; a production design should use a
+The application uses the RDS master credential; a future change should use a
 restricted application user. CloudWatch application/system log shipping and
 alarms are not configured.
 
-## Production Safeguards Not Yet Implemented
+## Production Safeguards
 
-Production, Multi-AZ RDS, deletion protection, longer backup retention, monitoring
-alarms, and stricter operator permissions remain future work.
+Production planning requires explicit ingress CIDRs and rejects `0.0.0.0/0`.
+Only those CIDRs can reach HTTP port 80; unused HTTPS ingress is disabled. EC2 and
+RDS remain private, and the existing security-group reference chain is reused.
+RDS uses Multi-AZ, deletion protection, required final snapshots, encrypted
+storage, managed credentials, and 30-day backups. The production configuration
+has not been applied.

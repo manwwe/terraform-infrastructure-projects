@@ -65,3 +65,12 @@ bootstrap deletion safeguards.
 
 Never delete the backend first: doing so removes Terraform's authoritative record
 before the resources it manages are gone.
+
+## Production Teardown Safeguards
+
+The production root is not applied in this stage, so there is nothing to tear
+down. If production is applied later, its RDS deletion protection deliberately
+blocks routine destruction. Teardown requires a separate reviewed change that
+disables deletion protection while keeping `skip_final_snapshot = false` and the
+final snapshot identifier configured. Confirm the production state key and
+preserve the resulting snapshot before any later backend cleanup.
